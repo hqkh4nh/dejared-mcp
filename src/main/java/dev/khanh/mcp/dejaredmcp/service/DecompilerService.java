@@ -9,6 +9,13 @@ import java.io.IOException;
 import java.util.*;
 import java.util.jar.JarFile;
 
+/**
+ * Orchestrates Java class decompilation across multiple {@link DecompilerEngine} implementations.
+ *
+ * <p>Maintains a thread-safe LRU cache (keyed by {@code jarPath:className:engine}) to avoid
+ * redundant decompilation. The cache size is configurable via {@code dejared.cache.max-size}
+ * (default 500).
+ */
 @Service
 public class DecompilerService {
 
@@ -30,6 +37,18 @@ public class DecompilerService {
         });
     }
 
+    /**
+     * Decompiles a class from a JAR file, returning Java source code or an error message.
+     *
+     * <p>Results are cached; subsequent calls with the same arguments return the cached output.
+     * On failure, the error message suggests alternative engines the caller can try.
+     *
+     * @param jarFilePath absolute path to the JAR file
+     * @param className   fully-qualified class name (e.g. {@code "com.example.Foo"})
+     * @param engine      engine name ({@code "cfr"}, {@code "vineflower"}, {@code "procyon"});
+     *                    defaults to {@code "cfr"} if {@code null} or blank
+     * @return decompiled source code, or an error message prefixed with {@code "Error:"}
+     */
     public String decompile(String jarFilePath, String className, String engine) {
         String engineName = (engine == null || engine.isBlank()) ? "cfr" : engine.toLowerCase();
 

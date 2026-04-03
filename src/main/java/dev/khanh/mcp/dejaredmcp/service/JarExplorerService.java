@@ -9,6 +9,13 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
+/**
+ * Explores the structure and contents of JAR files.
+ *
+ * <p>Provides package/class listing, class name search, and text resource reading.
+ * All public methods accept an absolute JAR path and return a human-readable string
+ * (or an error message prefixed with {@code "Error:"}).
+ */
 @Service
 public class JarExplorerService {
 
@@ -16,6 +23,12 @@ public class JarExplorerService {
             "yml", "yaml", "xml", "properties", "json", "txt", "sql", "conf"
     );
 
+    /**
+     * Lists all packages in a JAR with their class counts, sorted alphabetically.
+     *
+     * @param jarFilePath absolute path to the JAR file
+     * @return one package per line in the format {@code "com.example (5 classes)"}
+     */
     public String listPackages(String jarFilePath) {
         try (var jarFile = new JarFile(jarFilePath)) {
             Map<String, Integer> packageCounts = new TreeMap<>();
@@ -43,6 +56,13 @@ public class JarExplorerService {
         }
     }
 
+    /**
+     * Lists all classes that are direct members of a specific package (non-recursive).
+     *
+     * @param jarFilePath absolute path to the JAR file
+     * @param packageName dot-separated package name (e.g. {@code "com.example.config"})
+     * @return one fully-qualified class name per line, sorted alphabetically
+     */
     public String listClasses(String jarFilePath, String packageName) {
         try (var jarFile = new JarFile(jarFilePath)) {
             String packagePath = packageName.replace('.', '/') + "/";
@@ -66,6 +86,13 @@ public class JarExplorerService {
         }
     }
 
+    /**
+     * Searches for classes whose simple name contains the given keyword (case-insensitive).
+     *
+     * @param jarFilePath absolute path to the JAR file
+     * @param keyword     search term matched against simple class names
+     * @return matching fully-qualified class names, one per line
+     */
     public String searchClass(String jarFilePath, String keyword) {
         try (var jarFile = new JarFile(jarFilePath)) {
             String lowerKeyword = keyword.toLowerCase();
@@ -91,6 +118,16 @@ public class JarExplorerService {
         }
     }
 
+    /**
+     * Reads a text-based resource file from inside a JAR.
+     *
+     * <p>Only files with supported extensions are allowed:
+     * yml, yaml, xml, properties, json, txt, sql, conf.
+     *
+     * @param jarFilePath  absolute path to the JAR file
+     * @param resourcePath path within the JAR (e.g. {@code "application.yml"})
+     * @return the resource content as UTF-8 text
+     */
     public String readResource(String jarFilePath, String resourcePath) {
         String extension = getExtension(resourcePath);
         if (!SUPPORTED_EXTENSIONS.contains(extension)) {

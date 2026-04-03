@@ -9,9 +9,23 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+/**
+ * Analyzes Java bytecode using ASM to extract class metadata and search string constants.
+ *
+ * <p>Unlike decompilation, bytecode analysis is fast and does not require a decompiler engine.
+ * It operates directly on {@code .class} entries inside JAR files.
+ */
 @Service
 public class BytecodeAnalyzerService {
 
+    /**
+     * Extracts structural metadata (hierarchy, annotations, fields, methods) from a class
+     * without decompiling it.
+     *
+     * @param jarFilePath absolute path to the JAR file
+     * @param className   fully-qualified class name (e.g. {@code "com.example.Foo"})
+     * @return formatted metadata string, or an error message prefixed with {@code "Error:"}
+     */
     public String getMetadata(String jarFilePath, String className) {
         String classPath = className.replace('.', '/') + ".class";
 
@@ -45,6 +59,16 @@ public class BytecodeAnalyzerService {
         }
     }
 
+    /**
+     * Searches for string literals across all classes in a JAR (case-insensitive).
+     *
+     * <p>Scans both constant pool values (static fields) and {@code LDC} instructions
+     * (strings loaded at runtime). Useful for finding hardcoded URLs, SQL, error messages, etc.
+     *
+     * @param jarFilePath absolute path to the JAR file
+     * @param query       text to search for (case-insensitive)
+     * @return matching strings grouped by class name, or an error message
+     */
     public String searchString(String jarFilePath, String query) {
         String lowerQuery = query.toLowerCase();
 

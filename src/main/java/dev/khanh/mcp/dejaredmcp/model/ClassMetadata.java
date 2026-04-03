@@ -2,6 +2,19 @@ package dev.khanh.mcp.dejaredmcp.model;
 
 import java.util.List;
 
+/**
+ * Structural metadata of a Java class extracted from bytecode via ASM.
+ *
+ * <p>Contains the class hierarchy, annotations, fields, and methods without
+ * performing a full decompilation — significantly faster for inspection.
+ *
+ * @param className   fully-qualified class name
+ * @param superClass  fully-qualified superclass name
+ * @param interfaces  implemented interfaces
+ * @param annotations class-level annotations (simple names prefixed with {@code @})
+ * @param fields      declared fields with type and access modifiers
+ * @param methods     declared methods with signature and access modifiers
+ */
 public record ClassMetadata(
         String className,
         String superClass,
