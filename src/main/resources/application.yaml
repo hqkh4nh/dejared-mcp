@@ -8,6 +8,8 @@ spring:
       server:
         stdio: true
         name: dejared
+        annotation-scanner:
+          enabled: false
 
 logging:
   file:
