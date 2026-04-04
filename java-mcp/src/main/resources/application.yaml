@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: dejared-mcp
+  main:
+    banner-mode: off
+  ai:
+    mcp:
+      server:
+        stdio: true
+        name: dejared
+        annotation-scanner:
+          enabled: false
+
+logging:
+  file:
+    name: dejared.log
+  level:
+    root: WARN
+
+dejared:
+  cache:
+    max-size: 500
+  security:
+    max-resource-size: 5242880        # 5MB
+    decompile-timeout-seconds: 30
