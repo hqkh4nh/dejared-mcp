@@ -222,6 +222,7 @@ public class BytecodeAnalyzerService {
         return String.join(" ", mods);
     }
 
+    /** ASM visitor that collects class structural metadata without reading method bodies. */
     private static class MetadataCollector extends ClassVisitor {
         String superName;
         List<String> interfaces = new ArrayList<>();
@@ -280,6 +281,7 @@ public class BytecodeAnalyzerService {
         }
     }
 
+    /** ASM visitor that searches for string literals in constant pools and LDC instructions. */
     private static class StringCollector extends ClassVisitor {
         final String lowerQuery;
         final List<String> matches = new ArrayList<>();

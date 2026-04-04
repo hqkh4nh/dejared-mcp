@@ -12,6 +12,16 @@ import org.springframework.stereotype.Component;
 
 import java.io.StringWriter;
 
+/**
+ * Decompiler engine backed by Procyon.
+ *
+ * <p>Procyon handles some edge cases better than CFR/Vineflower (e.g. certain obfuscated
+ * bytecode patterns). Uses a {@link CompositeTypeLoader} that combines an
+ * {@link ArrayTypeLoader} (for the target class bytes) with a {@link ClasspathTypeLoader}
+ * (for resolving referenced JDK types).
+ *
+ * @see <a href="https://github.com/mstrobel/procyon">Procyon on GitHub</a>
+ */
 @Component
 public class ProcyonEngine implements DecompilerEngine {
 

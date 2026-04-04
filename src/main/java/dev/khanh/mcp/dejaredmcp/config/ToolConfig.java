@@ -11,6 +11,17 @@ import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Registers all MCP tool methods for the dejared server.
+ *
+ * <p>Each {@code @Tool}-annotated method is exposed as an MCP tool that LLMs can invoke.
+ * Tool descriptions use prompt engineering to guide efficient usage (e.g. metadata before
+ * decompilation). All tools validate JAR paths via {@link JarPathValidator} before processing.
+ *
+ * @see JarExplorerService
+ * @see BytecodeAnalyzerService
+ * @see DecompilerService
+ */
 @Configuration(proxyBeanMethods = false)
 public class ToolConfig {
 

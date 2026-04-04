@@ -3,13 +3,22 @@ package dev.khanh.mcp.dejaredmcp.validation;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Validates absolute paths to JAR files before they are opened.
+ *
+ * <p>Checks for null/blank input, path traversal ({@code ".."}), file existence,
+ * and {@code .jar} extension. Used by {@link dev.khanh.mcp.dejaredmcp.config.ToolConfig}
+ * as a guard before all tool operations.
+ */
 public final class JarPathValidator {
 
     private JarPathValidator() {}
 
     /**
      * Validates the given JAR file path.
-     * Returns null if valid, or an error message string if invalid.
+     *
+     * @param jarFilePath the absolute path to validate
+     * @return {@code null} if valid, or an error message string prefixed with {@code "Error:"}
      */
     public static String validate(String jarFilePath) {
         if (jarFilePath == null || jarFilePath.isBlank()) {
