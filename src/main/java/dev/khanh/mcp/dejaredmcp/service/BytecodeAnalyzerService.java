@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 
 /**
  * Analyzes Java bytecode using ASM to extract class metadata and search string constants.
@@ -54,6 +55,77 @@ public class BytecodeAnalyzerService {
             );
 
             return metadata.toString();
+        } catch (IOException e) {
+            return "Error: Failed to read JAR file: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Dumps structural metadata for all direct classes in one or more packages using ASM.
+     *
+     * <p>Accepts multiple package names to batch metadata extraction in a single call,
+     * avoiding N+1 round-trips. Uses {@code ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG}
+     * for fast analysis without decompilation.
+     *
+     * @param jarFilePath  absolute path to the JAR file
+     * @param packageNames list of dot-separated package names
+     * @return compact metadata for all classes in the requested packages
+     */
+    public String dumpPackageMetadata(String jarFilePath, List<String> packageNames) {
+        try (var jarFile = new JarFile(jarFilePath)) {
+            Set<String> packagePaths = packageNames.stream()
+                    .map(pkg -> pkg.replace('.', '/') + "/")
+                    .collect(Collectors.toSet());
+
+            List<JarEntry> classEntries = jarFile.stream()
+                    .filter(entry -> entry.getName().endsWith(".class"))
+                    .filter(entry -> packagePaths.stream().anyMatch(pp ->
+                            entry.getName().startsWith(pp)
+                                    && !entry.getName().substring(pp.length()).contains("/")))
+                    .sorted(Comparator.comparing(JarEntry::getName))
+                    .toList();
+
+            if (classEntries.isEmpty()) {
+                return "Error: No classes found in packages " + packageNames + " in " + jarFilePath;
+            }
+
+            var sb = new StringBuilder();
+            for (JarEntry entry : classEntries) {
+                try (var is = jarFile.getInputStream(entry)) {
+                    byte[] classBytes = is.readAllBytes();
+                    ClassReader reader = new ClassReader(classBytes);
+                    MetadataCollector collector = new MetadataCollector();
+                    reader.accept(collector, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG);
+
+                    String className = entry.getName()
+                            .substring(0, entry.getName().length() - 6)
+                            .replace('/', '.');
+
+                    sb.append("--- ").append(className).append(" ---\n");
+
+                    if (!collector.annotations.isEmpty()) {
+                        sb.append("  Annotations: ").append(String.join(", ", collector.annotations)).append("\n");
+                    }
+                    sb.append("  Extends: ").append(toJavaName(collector.superName)).append("\n");
+                    if (!collector.interfaces.isEmpty()) {
+                        sb.append("  Implements: ")
+                                .append(collector.interfaces.stream().map(BytecodeAnalyzerService::toJavaName).collect(Collectors.joining(", ")))
+                                .append("\n");
+                    }
+                    if (!collector.fields.isEmpty()) {
+                        sb.append("  Fields:\n");
+                        collector.fields.forEach(f -> sb.append("    ").append(f).append("\n"));
+                    }
+                    if (!collector.methods.isEmpty()) {
+                        sb.append("  Methods:\n");
+                        collector.methods.forEach(m -> sb.append("    ").append(m).append("\n"));
+                    }
+                    sb.append("\n");
+                } catch (IOException ignored) {
+                }
+            }
+
+            return sb.toString().stripTrailing();
         } catch (IOException e) {
             return "Error: Failed to read JAR file: " + e.getMessage();
         }

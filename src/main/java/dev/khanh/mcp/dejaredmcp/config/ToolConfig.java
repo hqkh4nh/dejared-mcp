@@ -91,6 +91,16 @@ public class ToolConfig {
 
     // --- Group 3: Deep Analysis ---
 
+    @Tool(name = "dejared_dump_package_metadata",
+          description = "Dump structural metadata (class names, annotations, fields, methods) for ALL classes in one or more packages using ASM — no decompilation. Accepts multiple packages in one call to avoid round-trips. Use this to understand package architecture before deciding which classes to decompile.")
+    public String dumpPackageMetadata(
+            @ToolParam(description = "Absolute path to the JAR file") String jarFilePath,
+            @ToolParam(description = "List of package names, e.g. [\"com.example.service\", \"com.example.config\"]") java.util.List<String> packageNames) {
+        String error = JarPathValidator.validate(jarFilePath);
+        if (error != null) return error;
+        return bytecodeAnalyzer.dumpPackageMetadata(jarFilePath, packageNames);
+    }
+
     @Tool(name = "dejared_get_metadata",
           description = "Extract class metadata using ASM bytecode analysis (no decompilation needed). Returns superclass, interfaces, annotations, fields, and methods with their signatures. Much faster than decompiling — use this to inspect a class before deciding to decompile it.")
     public String getMetadata(

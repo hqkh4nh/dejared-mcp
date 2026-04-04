@@ -7,6 +7,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,6 +62,42 @@ class BytecodeAnalyzerServiceTest {
         var result = service.getMetadata(testJar.toString(), "com.example.NonExistent");
         assertTrue(result.contains("Error"));
         assertTrue(result.contains("not found"));
+    }
+
+    @Test
+    void dumpPackageMetadata_returnsAllClassesInPackage() {
+        var result = service.dumpPackageMetadata(testJar.toString(), List.of("com.example.hello"));
+        assertTrue(result.contains("HelloWorld"));
+        assertTrue(result.contains("Greeter"));
+        assertFalse(result.contains("StringHelper"));
+    }
+
+    @Test
+    void dumpPackageMetadata_showsFieldsAndMethods() {
+        var result = service.dumpPackageMetadata(testJar.toString(), List.of("com.example.hello"));
+        assertTrue(result.contains("message"));
+        assertTrue(result.contains("greet"));
+        assertTrue(result.contains("main"));
+    }
+
+    @Test
+    void dumpPackageMetadata_showsAnnotations() {
+        var result = service.dumpPackageMetadata(testJar.toString(), List.of("com.example.hello"));
+        assertTrue(result.contains("Deprecated"));
+    }
+
+    @Test
+    void dumpPackageMetadata_batchMultiplePackages() {
+        var result = service.dumpPackageMetadata(testJar.toString(), List.of("com.example.hello", "com.example.util"));
+        assertTrue(result.contains("HelloWorld"));
+        assertTrue(result.contains("Greeter"));
+        assertTrue(result.contains("StringHelper"));
+    }
+
+    @Test
+    void dumpPackageMetadata_unknownPackage() {
+        var result = service.dumpPackageMetadata(testJar.toString(), List.of("com.nonexistent"));
+        assertTrue(result.contains("Error"));
     }
 
     @Test
