@@ -1,8 +1,11 @@
 {
   "mcpServers": {
     "dejared": {
-      "command": "java",
-      "args": ["-jar", "${CLAUDE_PLUGIN_ROOT}/build/libs/dejared-mcp-0.0.1-SNAPSHOT.jar"]
+      "command": "npx",
+      "args": ["-y", "dejared-mcp"],
+      "env": {
+        "DEJARED_JAVA_PATH": "/path/to/java"
+      }
     }
   }
 }
