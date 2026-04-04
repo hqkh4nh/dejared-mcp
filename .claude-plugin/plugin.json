@@ -1,0 +1,11 @@
+{
+  "name": "dejared",
+  "version": "0.0.1",
+  "description": "Explore, analyze, and decompile Java JAR files with structured workflows.",
+  "author": {
+    "name": "HuynhKhanh1402"
+  },
+  "repository": "https://github.com/HuynhKhanh1402/dejared-mcp",
+  "license": "MIT",
+  "keywords": ["java", "jar", "decompiler", "bytecode", "reverse-engineering", "mcp"]
+}
