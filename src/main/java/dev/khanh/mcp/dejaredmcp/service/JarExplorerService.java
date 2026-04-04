@@ -64,14 +64,31 @@ public class JarExplorerService {
      * @return one fully-qualified class name per line, sorted alphabetically
      */
     public String listClasses(String jarFilePath, String packageName) {
+        return listClasses(jarFilePath, packageName, false);
+    }
+
+    /**
+     * Lists classes in a package, optionally including all sub-packages.
+     *
+     * @param jarFilePath absolute path to the JAR file
+     * @param packageName dot-separated package name (e.g. {@code "com.example.config"})
+     * @param recursive   if {@code true}, includes classes from all sub-packages
+     * @return one fully-qualified class name per line, sorted alphabetically
+     */
+    public String listClasses(String jarFilePath, String packageName, boolean recursive) {
         try (var jarFile = new JarFile(jarFilePath)) {
             String packagePath = packageName.replace('.', '/') + "/";
 
-            List<String> classes = jarFile.stream()
+            var stream = jarFile.stream()
                     .map(JarEntry::getName)
                     .filter(name -> name.endsWith(".class"))
-                    .filter(name -> name.startsWith(packagePath))
-                    .filter(name -> !name.substring(packagePath.length()).contains("/")) // direct children only
+                    .filter(name -> name.startsWith(packagePath));
+
+            if (!recursive) {
+                stream = stream.filter(name -> !name.substring(packagePath.length()).contains("/"));
+            }
+
+            List<String> classes = stream
                     .map(name -> name.substring(0, name.length() - 6).replace('/', '.'))
                     .sorted()
                     .toList();

@@ -38,13 +38,14 @@ public class ToolConfig {
     }
 
     @Tool(name = "dejared_list_classes",
-          description = "List all classes in a specific package within a JAR file.")
+          description = "List classes in a package. Set recursive=true to include all sub-packages in one call (avoids multiple round-trips).")
     public String listClasses(
             @ToolParam(description = "Absolute path to the JAR file") String jarFilePath,
-            @ToolParam(description = "Package name, e.g. com.example.config") String packageName) {
+            @ToolParam(description = "Package name, e.g. com.example.config") String packageName,
+            @ToolParam(description = "If true, include classes from all sub-packages recursively. Default: false", required = false) Boolean recursive) {
         String error = JarPathValidator.validate(jarFilePath);
         if (error != null) return error;
-        return jarExplorer.listClasses(jarFilePath, packageName);
+        return jarExplorer.listClasses(jarFilePath, packageName, Boolean.TRUE.equals(recursive));
     }
 
     @Tool(name = "dejared_read_resource",

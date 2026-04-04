@@ -48,6 +48,21 @@ class JarExplorerServiceTest {
     }
 
     @Test
+    void listClasses_recursiveIncludesSubPackages() {
+        var result = service.listClasses(testJar.toString(), "com.example", true);
+        assertTrue(result.contains("com.example.hello.HelloWorld"));
+        assertTrue(result.contains("com.example.hello.Greeter"));
+        assertTrue(result.contains("com.example.util.StringHelper"));
+    }
+
+    @Test
+    void listClasses_nonRecursiveExcludesSubPackages() {
+        var result = service.listClasses(testJar.toString(), "com.example.hello", false);
+        assertTrue(result.contains("com.example.hello.HelloWorld"));
+        assertFalse(result.contains("com.example.util.StringHelper"));
+    }
+
+    @Test
     void listClasses_unknownPackage() {
         var result = service.listClasses(testJar.toString(), "com.nonexistent");
         assertTrue(result.contains("Error"));
