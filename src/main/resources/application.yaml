@@ -20,3 +20,6 @@ logging:
 dejared:
   cache:
     max-size: 500
+  security:
+    max-resource-size: 5242880        # 5MB
+    decompile-timeout-seconds: 30

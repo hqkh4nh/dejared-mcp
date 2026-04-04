@@ -60,7 +60,7 @@ public class ToolConfig {
     }
 
     @Tool(name = "dejared_read_resource",
-          description = "Read a text-based resource file (yml, yaml, xml, properties, json, txt, sql, conf) from inside a JAR.")
+          description = "Read a text-based resource file from inside a JAR. Automatically detects text vs binary content — no extension restrictions.")
     public String readResource(
             @ToolParam(description = "Absolute path to the JAR file") String jarFilePath,
             @ToolParam(description = "Path to the resource inside the JAR, e.g. application.yml or META-INF/spring.factories") String resourcePath) {
