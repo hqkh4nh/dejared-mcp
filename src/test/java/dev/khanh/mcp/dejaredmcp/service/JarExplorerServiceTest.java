@@ -5,10 +5,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,7 +23,7 @@ class JarExplorerServiceTest {
     @BeforeAll
     static void setup() throws IOException {
         testJar = TestJarBuilder.createTestJar(tempDir);
-        service = new JarExplorerService();
+        service = new JarExplorerService(5 * 1024 * 1024); // 5MB limit
     }
 
     @Test
@@ -36,7 +36,6 @@ class JarExplorerServiceTest {
     @Test
     void listPackages_showsClassCount() {
         var result = service.listPackages(testJar.toString());
-        // com.example.hello has HelloWorld + Greeter = 2 classes
         assertTrue(result.contains("2 classes"));
     }
 
@@ -88,26 +87,60 @@ class JarExplorerServiceTest {
         assertTrue(result.contains("No classes found"));
     }
 
+    // --- readResource: content-based detection ---
+
     @Test
-    void readResource_readsProperties() {
+    void readResource_readsPropertiesFile() {
         var result = service.readResource(testJar.toString(), "application.properties");
         assertTrue(result.contains("app.name=TestApp"));
         assertTrue(result.contains("app.version=1.0"));
     }
 
     @Test
-    void readResource_rejectsUnsupportedType() {
+    void readResource_rejectsBinaryFile() {
         var result = service.readResource(testJar.toString(), "data.bin");
         assertTrue(result.contains("Error"));
-        assertTrue(result.contains("not a supported text format"));
+        assertTrue(result.contains("binary"));
     }
 
     @Test
     void readResource_notFound() {
         var result = service.readResource(testJar.toString(), "missing.yml");
         assertTrue(result.contains("Error"));
-        assertTrue(result.contains("not found"));
     }
+
+    @Test
+    void readResource_rejectsPathTraversal() {
+        var result = service.readResource(testJar.toString(), "../../../etc/passwd");
+        assertTrue(result.contains("Error"));
+        assertFalse(result.contains("etc/passwd"));
+    }
+
+    @Test
+    void readResource_rejectsAbsolutePath() {
+        var result = service.readResource(testJar.toString(), "/etc/passwd");
+        assertTrue(result.contains("Error"));
+    }
+
+    // --- readResource: size limit ---
+
+    @Test
+    void readResource_rejectsOversizedResource() throws IOException {
+        Path bigJar = tempDir.resolve("big.jar");
+        try (var jos = new JarOutputStream(new java.io.FileOutputStream(bigJar.toFile()))) {
+            var entry = new JarEntry("big.txt");
+            jos.putNextEntry(entry);
+            byte[] data = "A".repeat(100).getBytes();
+            jos.write(data);
+            jos.closeEntry();
+        }
+        var smallLimitService = new JarExplorerService(50); // 50 byte limit
+        var result = smallLimitService.readResource(bigJar.toString(), "big.txt");
+        assertTrue(result.contains("Error"));
+        assertTrue(result.contains("too large"));
+    }
+
+    // --- listResources ---
 
     @Test
     void listResources_returnsNonClassFiles() {
@@ -119,15 +152,21 @@ class JarExplorerServiceTest {
 
     @Test
     void listResources_emptyJarReturnsMessage() throws IOException {
-        // Create an empty JAR (no resources)
         Path emptyJar = tempDir.resolve("empty.jar");
-        try (var jos = new java.util.jar.JarOutputStream(new java.io.FileOutputStream(emptyJar.toFile()))) {
-            // Add only a class file, no resources
-            jos.putNextEntry(new java.util.jar.JarEntry("com/example/Foo.class"));
+        try (var jos = new JarOutputStream(new java.io.FileOutputStream(emptyJar.toFile()))) {
+            jos.putNextEntry(new JarEntry("com/example/Foo.class"));
             jos.write(new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE});
             jos.closeEntry();
         }
         var result = service.listResources(emptyJar.toString());
         assertTrue(result.contains("No resource"));
+    }
+
+    // --- error sanitization ---
+
+    @Test
+    void errorMessages_doNotContainFilePaths() {
+        var result = service.listPackages("/nonexistent/path/to/file.jar");
+        assertFalse(result.contains("/nonexistent/path"));
     }
 }

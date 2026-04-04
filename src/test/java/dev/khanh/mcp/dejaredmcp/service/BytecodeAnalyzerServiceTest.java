@@ -125,4 +125,28 @@ class BytecodeAnalyzerServiceTest {
         var result = service.searchString(testJar.toString(), "zzz_nonexistent_zzz");
         assertTrue(result.contains("No strings found"));
     }
+
+    @Test
+    void getMetadata_rejectsClassNameWithSlash() {
+        String result = service.getMetadata(testJar.toString(), "com/example/HelloWorld");
+        assertTrue(result.startsWith("Error:"));
+    }
+
+    @Test
+    void getMetadata_rejectsNullClassName() {
+        String result = service.getMetadata(testJar.toString(), null);
+        assertTrue(result.startsWith("Error:"));
+    }
+
+    @Test
+    void dumpPackageMetadata_rejectsInvalidPackageName() {
+        String result = service.dumpPackageMetadata(testJar.toString(), java.util.List.of("com/example"));
+        assertTrue(result.startsWith("Error:"));
+    }
+
+    @Test
+    void getMetadata_errorMessagesDoNotLeakPaths() {
+        String result = service.getMetadata("/nonexistent/secret.jar", "com.example.Foo");
+        assertFalse(result.contains("/nonexistent/secret"));
+    }
 }

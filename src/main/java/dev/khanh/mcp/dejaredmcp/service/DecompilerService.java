@@ -2,28 +2,35 @@ package dev.khanh.mcp.dejaredmcp.service;
 
 import dev.khanh.mcp.dejaredmcp.decompiler.DecompilerEngine;
 import dev.khanh.mcp.dejaredmcp.model.DecompileResult;
+import dev.khanh.mcp.dejaredmcp.validation.JarPathValidator;
+import jakarta.annotation.PreDestroy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.jar.JarFile;
 
 /**
  * Orchestrates Java class decompilation across multiple {@link DecompilerEngine} implementations.
- *
- * <p>Maintains a thread-safe LRU cache (keyed by {@code jarPath:className:engine}) to avoid
- * redundant decompilation. The cache size is configurable via {@code dejared.cache.max-size}
- * (default 500).
+ * Provides caching, timeout enforcement, and engine selection.
  */
 @Service
 public class DecompilerService {
 
+    private static final Logger log = LoggerFactory.getLogger(DecompilerService.class);
+
     private final Map<String, DecompilerEngine> engines;
     private final Map<String, String> cache;
+    private final int decompileTimeoutSeconds;
+    private final ExecutorService decompileExecutor;
 
     public DecompilerService(List<DecompilerEngine> engineList,
-                             @Value("${dejared.cache.max-size:500}") int maxCacheSize) {
+                             @Value("${dejared.cache.max-size:500}") int maxCacheSize,
+                             @Value("${dejared.security.decompile-timeout-seconds:30}") int decompileTimeoutSeconds) {
         this.engines = new HashMap<>();
         for (DecompilerEngine engine : engineList) {
             this.engines.put(engine.name(), engine);
@@ -35,21 +42,35 @@ public class DecompilerService {
                 return size() > maxCacheSize;
             }
         });
+
+        this.decompileTimeoutSeconds = decompileTimeoutSeconds;
+        this.decompileExecutor = Executors.newCachedThreadPool(r -> {
+            Thread t = new Thread(r, "decompile-worker");
+            t.setDaemon(true);
+            return t;
+        });
+    }
+
+    @PreDestroy
+    void shutdown() {
+        decompileExecutor.shutdownNow();
     }
 
     /**
      * Decompiles a class from a JAR file, returning Java source code or an error message.
      *
-     * <p>Results are cached; subsequent calls with the same arguments return the cached output.
-     * On failure, the error message suggests alternative engines the caller can try.
-     *
-     * @param jarFilePath absolute path to the JAR file
-     * @param className   fully-qualified class name (e.g. {@code "com.example.Foo"})
-     * @param engine      engine name ({@code "cfr"}, {@code "vineflower"}, {@code "procyon"});
-     *                    defaults to {@code "cfr"} if {@code null} or blank
-     * @return decompiled source code, or an error message prefixed with {@code "Error:"}
+     * @param jarFilePath path to the JAR file
+     * @param className   fully qualified class name
+     * @param engine      decompiler engine name (e.g. "cfr"), or {@code null} for default
+     * @return decompiled source code, or an error message prefixed with "Error:"
      */
     public String decompile(String jarFilePath, String className, String engine) {
+        // Validate class name
+        String classError = JarPathValidator.validateClassName(className);
+        if (classError != null) {
+            return classError;
+        }
+
         String engineName = (engine == null || engine.isBlank()) ? "cfr" : engine.toLowerCase();
 
         DecompilerEngine decompilerEngine = engines.get(engineName);
@@ -69,16 +90,39 @@ public class DecompilerService {
         try (var jarFile = new JarFile(jarFilePath)) {
             var entry = jarFile.getJarEntry(classPath);
             if (entry == null) {
-                return "Error: Class '" + className + "' not found in " + jarFilePath;
+                return "Error: Class not found.";
             }
+
+            // Zip bomb check
+            if (JarExplorerService.isSuspiciousEntry(entry)) {
+                return "Error: Suspicious compression ratio detected.";
+            }
+
             try (var is = jarFile.getInputStream(entry)) {
                 classBytes = is.readAllBytes();
             }
         } catch (IOException e) {
-            return "Error: Failed to read JAR file: " + e.getMessage();
+            log.warn("Failed to read JAR file", e);
+            return "Error: Failed to read JAR file.";
         }
 
-        DecompileResult result = decompilerEngine.decompile(classBytes, className);
+        // Decompile with timeout
+        Future<DecompileResult> future = decompileExecutor.submit(
+                () -> decompilerEngine.decompile(classBytes, className)
+        );
+        DecompileResult result;
+        try {
+            result = future.get(decompileTimeoutSeconds, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            future.cancel(true);
+            return "Error: Decompilation timed out after " + decompileTimeoutSeconds + " seconds.";
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return "Error: Decompilation was interrupted.";
+        } catch (ExecutionException e) {
+            log.warn("Decompilation failed", e);
+            return "Error: Decompilation failed.";
+        }
 
         if (result.success()) {
             String output = result.content();

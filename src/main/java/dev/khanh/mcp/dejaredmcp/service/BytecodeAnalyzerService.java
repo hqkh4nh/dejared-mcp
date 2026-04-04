@@ -1,7 +1,10 @@
 package dev.khanh.mcp.dejaredmcp.service;
 
 import dev.khanh.mcp.dejaredmcp.model.*;
+import dev.khanh.mcp.dejaredmcp.validation.JarPathValidator;
 import org.objectweb.asm.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -19,6 +22,8 @@ import java.util.stream.Collectors;
 @Service
 public class BytecodeAnalyzerService {
 
+    private static final Logger log = LoggerFactory.getLogger(BytecodeAnalyzerService.class);
+
     /**
      * Extracts structural metadata (hierarchy, annotations, fields, methods) from a class
      * without decompiling it.
@@ -28,12 +33,22 @@ public class BytecodeAnalyzerService {
      * @return formatted metadata string, or an error message prefixed with {@code "Error:"}
      */
     public String getMetadata(String jarFilePath, String className) {
+        String classError = JarPathValidator.validateClassName(className);
+        if (classError != null) {
+            return classError;
+        }
+
         String classPath = className.replace('.', '/') + ".class";
 
         try (var jarFile = new JarFile(jarFilePath)) {
             JarEntry entry = jarFile.getJarEntry(classPath);
             if (entry == null) {
-                return "Error: Class '" + className + "' not found in " + jarFilePath;
+                return "Error: Class not found.";
+            }
+
+            // Zip bomb check
+            if (JarExplorerService.isSuspiciousEntry(entry)) {
+                return "Error: Suspicious compression ratio detected.";
             }
 
             byte[] classBytes;
@@ -56,7 +71,8 @@ public class BytecodeAnalyzerService {
 
             return metadata.toString();
         } catch (IOException e) {
-            return "Error: Failed to read JAR file: " + e.getMessage();
+            log.warn("Failed to read JAR file", e);
+            return "Error: Failed to read JAR file.";
         }
     }
 
@@ -72,6 +88,13 @@ public class BytecodeAnalyzerService {
      * @return compact metadata for all classes in the requested packages
      */
     public String dumpPackageMetadata(String jarFilePath, List<String> packageNames) {
+        for (String pkg : packageNames) {
+            String pkgError = JarPathValidator.validatePackageName(pkg);
+            if (pkgError != null) {
+                return pkgError;
+            }
+        }
+
         try (var jarFile = new JarFile(jarFilePath)) {
             Set<String> packagePaths = packageNames.stream()
                     .map(pkg -> pkg.replace('.', '/') + "/")
@@ -86,7 +109,7 @@ public class BytecodeAnalyzerService {
                     .toList();
 
             if (classEntries.isEmpty()) {
-                return "Error: No classes found in packages " + packageNames + " in " + jarFilePath;
+                return "Error: No classes found in the specified packages.";
             }
 
             var sb = new StringBuilder();
@@ -127,7 +150,8 @@ public class BytecodeAnalyzerService {
 
             return sb.toString().stripTrailing();
         } catch (IOException e) {
-            return "Error: Failed to read JAR file: " + e.getMessage();
+            log.warn("Failed to read JAR file", e);
+            return "Error: Failed to read JAR file.";
         }
     }
 
@@ -167,7 +191,7 @@ public class BytecodeAnalyzerService {
                     });
 
             if (results.isEmpty()) {
-                return "No strings found matching '" + query + "' in " + jarFilePath;
+                return "No strings found matching '" + query + "'.";
             }
 
             var sb = new StringBuilder();
@@ -177,7 +201,8 @@ public class BytecodeAnalyzerService {
             });
             return sb.toString();
         } catch (IOException e) {
-            return "Error: Failed to read JAR file: " + e.getMessage();
+            log.warn("Failed to read JAR file", e);
+            return "Error: Failed to read JAR file.";
         }
     }
 

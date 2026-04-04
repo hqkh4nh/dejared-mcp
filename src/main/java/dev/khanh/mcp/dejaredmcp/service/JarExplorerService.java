@@ -1,8 +1,14 @@
 package dev.khanh.mcp.dejaredmcp.service;
 
+import dev.khanh.mcp.dejaredmcp.validation.JarPathValidator;
+import dev.khanh.mcp.dejaredmcp.validation.TextProbe;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.jar.JarEntry;
@@ -10,24 +16,25 @@ import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 /**
- * Explores the structure and contents of JAR files.
- *
- * <p>Provides package/class listing, class name search, and text resource reading.
- * All public methods accept an absolute JAR path and return a human-readable string
- * (or an error message prefixed with {@code "Error:"}).
+ * Explores the structure and contents of JAR files, providing package listing,
+ * class discovery, search, and resource reading capabilities.
  */
 @Service
 public class JarExplorerService {
 
-    private static final Set<String> SUPPORTED_EXTENSIONS = Set.of(
-            "yml", "yaml", "xml", "properties", "json", "txt", "sql", "conf"
-    );
+    private static final Logger log = LoggerFactory.getLogger(JarExplorerService.class);
+
+    private final long maxResourceSize;
+
+    public JarExplorerService(@Value("${dejared.security.max-resource-size:5242880}") long maxResourceSize) {
+        this.maxResourceSize = maxResourceSize;
+    }
 
     /**
-     * Lists all packages in a JAR with their class counts, sorted alphabetically.
+     * Lists all packages in a JAR with their class counts.
      *
-     * @param jarFilePath absolute path to the JAR file
-     * @return one package per line in the format {@code "com.example (5 classes)"}
+     * @param jarFilePath path to the JAR file
+     * @return formatted list of packages with class counts, or an error message
      */
     public String listPackages(String jarFilePath) {
         try (var jarFile = new JarFile(jarFilePath)) {
@@ -45,23 +52,24 @@ public class JarExplorerService {
                     });
 
             if (packageCounts.isEmpty()) {
-                return "No packages found in " + jarFilePath;
+                return "No packages found.";
             }
 
             return packageCounts.entrySet().stream()
                     .map(e -> e.getKey() + " (" + e.getValue() + " classes)")
                     .collect(Collectors.joining("\n"));
         } catch (IOException e) {
-            return "Error: Failed to read JAR file: " + e.getMessage();
+            log.warn("Failed to read JAR file", e);
+            return "Error: Failed to read JAR file.";
         }
     }
 
     /**
-     * Lists all classes that are direct members of a specific package (non-recursive).
+     * Lists all classes that are direct members of the specified package.
      *
-     * @param jarFilePath absolute path to the JAR file
-     * @param packageName dot-separated package name (e.g. {@code "com.example.config"})
-     * @return one fully-qualified class name per line, sorted alphabetically
+     * @param jarFilePath  path to the JAR file
+     * @param packageName  fully qualified package name
+     * @return formatted list of class names, or an error message
      */
     public String listClasses(String jarFilePath, String packageName) {
         return listClasses(jarFilePath, packageName, false);
@@ -70,10 +78,10 @@ public class JarExplorerService {
     /**
      * Lists classes in a package, optionally including all sub-packages.
      *
-     * @param jarFilePath absolute path to the JAR file
-     * @param packageName dot-separated package name (e.g. {@code "com.example.config"})
-     * @param recursive   if {@code true}, includes classes from all sub-packages
-     * @return one fully-qualified class name per line, sorted alphabetically
+     * @param jarFilePath  path to the JAR file
+     * @param packageName  fully qualified package name
+     * @param recursive    if {@code true}, include classes in sub-packages
+     * @return formatted list of class names, or an error message
      */
     public String listClasses(String jarFilePath, String packageName, boolean recursive) {
         try (var jarFile = new JarFile(jarFilePath)) {
@@ -94,23 +102,28 @@ public class JarExplorerService {
                     .toList();
 
             if (classes.isEmpty()) {
-                return "Error: Package '" + packageName + "' not found in " + jarFilePath;
+                return "Error: Package not found.";
             }
 
             return String.join("\n", classes);
         } catch (IOException e) {
-            return "Error: Failed to read JAR file: " + e.getMessage();
+            log.warn("Failed to read JAR file", e);
+            return "Error: Failed to read JAR file.";
         }
     }
 
     /**
      * Searches for classes whose simple name contains the given keyword (case-insensitive).
      *
-     * @param jarFilePath absolute path to the JAR file
-     * @param keyword     search term matched against simple class names
-     * @return matching fully-qualified class names, one per line
+     * @param jarFilePath path to the JAR file
+     * @param keyword     search keyword to match against simple class names
+     * @return formatted list of matching fully qualified class names, or an error message
      */
     public String searchClass(String jarFilePath, String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return "Error: Search keyword must not be null or blank.";
+        }
+
         try (var jarFile = new JarFile(jarFilePath)) {
             String lowerKeyword = keyword.toLowerCase();
 
@@ -126,56 +139,71 @@ public class JarExplorerService {
                     .toList();
 
             if (matches.isEmpty()) {
-                return "No classes found matching '" + keyword + "' in " + jarFilePath;
+                return "No classes found matching '" + keyword + "'.";
             }
 
             return String.join("\n", matches);
         } catch (IOException e) {
-            return "Error: Failed to read JAR file: " + e.getMessage();
+            log.warn("Failed to read JAR file", e);
+            return "Error: Failed to read JAR file.";
         }
     }
 
     /**
-     * Reads a text-based resource file from inside a JAR.
+     * Reads a text-based resource file from inside a JAR. Uses content-based detection
+     * to reject binary files and enforces a configurable size limit.
      *
-     * <p>Only files with supported extensions are allowed:
-     * yml, yaml, xml, properties, json, txt, sql, conf.
-     *
-     * @param jarFilePath  absolute path to the JAR file
-     * @param resourcePath path within the JAR (e.g. {@code "application.yml"})
-     * @return the resource content as UTF-8 text
+     * @param jarFilePath  path to the JAR file
+     * @param resourcePath path of the resource entry inside the JAR
+     * @return the resource content as a UTF-8 string, or an error message
      */
     public String readResource(String jarFilePath, String resourcePath) {
-        String extension = getExtension(resourcePath);
-        if (!SUPPORTED_EXTENSIONS.contains(extension)) {
-            return "Error: Resource '" + resourcePath + "' not a supported text format (supported: "
-                    + String.join(", ", SUPPORTED_EXTENSIONS) + ")";
+        String pathError = JarPathValidator.validateResourcePath(resourcePath);
+        if (pathError != null) {
+            return pathError;
         }
 
         try (var jarFile = new JarFile(jarFilePath)) {
             JarEntry entry = jarFile.getJarEntry(resourcePath);
             if (entry == null) {
-                return "Error: Resource '" + resourcePath + "' not found in " + jarFilePath;
+                return "Error: Resource not found.";
             }
 
-            try (var is = jarFile.getInputStream(entry)) {
+            // Zip bomb check
+            if (isSuspiciousEntry(entry)) {
+                log.warn("Suspicious compression ratio for entry: {}", entry.getName());
+                return "Error: Suspicious compression ratio detected.";
+            }
+
+            // Size limit check
+            if (entry.getSize() != -1 && entry.getSize() > maxResourceSize) {
+                return "Error: Resource too large (" + entry.getSize() + " bytes, max " + maxResourceSize + " bytes).";
+            }
+
+            // Content-based text detection (first pass)
+            try (var probeStream = jarFile.getInputStream(entry)) {
+                if (!TextProbe.isLikelyText(probeStream)) {
+                    return "Error: Resource appears to be a binary file.";
+                }
+            }
+
+            // Read full content (second pass, with size limit)
+            try (var is = new BoundedInputStream(jarFile.getInputStream(entry), maxResourceSize)) {
                 return new String(is.readAllBytes(), StandardCharsets.UTF_8);
             }
+        } catch (ResourceTooLargeException e) {
+            return "Error: Resource too large (exceeded " + maxResourceSize + " bytes limit).";
         } catch (IOException e) {
-            return "Error: Failed to read resource: " + e.getMessage();
+            log.warn("Failed to read resource", e);
+            return "Error: Failed to read resource.";
         }
     }
 
     /**
      * Lists all non-class resource files inside a JAR with their sizes.
      *
-     * <p>Filters out {@code .class} files and directory entries, returning
-     * resource paths with sizes in a human-readable format. Use this to discover
-     * available resources before calling {@link #readResource}.
-     *
-     * @param jarFilePath absolute path to the JAR file
-     * @return one resource per line in the format {@code "path/to/resource (1234 bytes)"},
-     *         sorted alphabetically
+     * @param jarFilePath path to the JAR file
+     * @return formatted list of resource paths and sizes, or an error message
      */
     public String listResources(String jarFilePath) {
         try (var jarFile = new JarFile(jarFilePath)) {
@@ -187,17 +215,65 @@ public class JarExplorerService {
                     .toList();
 
             if (resources.isEmpty()) {
-                return "No resource files found in " + jarFilePath;
+                return "No resource files found.";
             }
 
             return String.join("\n", resources);
         } catch (IOException e) {
-            return "Error: Failed to read JAR file: " + e.getMessage();
+            log.warn("Failed to read JAR file", e);
+            return "Error: Failed to read JAR file.";
         }
     }
 
-    private static String getExtension(String filename) {
-        int dot = filename.lastIndexOf('.');
-        return dot >= 0 ? filename.substring(dot + 1).toLowerCase() : "";
+    static boolean isSuspiciousEntry(JarEntry entry) {
+        long compressed = entry.getCompressedSize();
+        long uncompressed = entry.getSize();
+        if (compressed > 0 && uncompressed > 0) {
+            return uncompressed / compressed > 100;
+        }
+        return false;
+    }
+
+    private static class ResourceTooLargeException extends IOException {
+        ResourceTooLargeException(String message) {
+            super(message);
+        }
+    }
+
+    private static class BoundedInputStream extends InputStream {
+        private final InputStream delegate;
+        private final long limit;
+        private long count;
+
+        BoundedInputStream(InputStream delegate, long limit) {
+            this.delegate = delegate;
+            this.limit = limit;
+        }
+
+        @Override
+        public int read() throws IOException {
+            if (count >= limit) {
+                throw new ResourceTooLargeException("Stream exceeded " + limit + " bytes");
+            }
+            int b = delegate.read();
+            if (b != -1) count++;
+            return b;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            if (count >= limit) {
+                throw new ResourceTooLargeException("Stream exceeded " + limit + " bytes");
+            }
+            int maxRead = (int) Math.min(len, limit - count);
+            int n = delegate.read(b, off, maxRead);
+            if (n > 0) count += n;
+            return n;
+        }
+
+        @Override
+        public void close() throws IOException {
+            delegate.close();
+        }
     }
 }

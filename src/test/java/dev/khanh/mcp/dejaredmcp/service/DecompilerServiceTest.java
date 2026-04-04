@@ -27,7 +27,8 @@ class DecompilerServiceTest {
         testJar = TestJarBuilder.createTestJar(tempDir);
         service = new DecompilerService(
                 List.of(new CfrEngine(), new VineflowerEngine(), new ProcyonEngine()),
-                500
+                500,
+                30
         );
     }
 
@@ -70,5 +71,30 @@ class DecompilerServiceTest {
         String first = service.decompile(testJar.toString(), "com.example.util.StringHelper", "cfr");
         String second = service.decompile(testJar.toString(), "com.example.util.StringHelper", "cfr");
         assertEquals(first, second);
+    }
+
+    @Test
+    void decompile_rejectsClassNameWithSlash() {
+        String result = service.decompile(testJar.toString(), "com/example/hello/HelloWorld", null);
+        assertTrue(result.startsWith("Error:"));
+        assertTrue(result.contains("Invalid class name"));
+    }
+
+    @Test
+    void decompile_rejectsClassNameWithDotDot() {
+        String result = service.decompile(testJar.toString(), "com..example.HelloWorld", null);
+        assertTrue(result.startsWith("Error:"));
+    }
+
+    @Test
+    void decompile_rejectsNullClassName() {
+        String result = service.decompile(testJar.toString(), null, null);
+        assertTrue(result.startsWith("Error:"));
+    }
+
+    @Test
+    void decompile_errorMessagesDoNotLeakPaths() {
+        String result = service.decompile("/nonexistent/secret/path.jar", "com.example.Foo", null);
+        assertFalse(result.contains("/nonexistent/secret"));
     }
 }
