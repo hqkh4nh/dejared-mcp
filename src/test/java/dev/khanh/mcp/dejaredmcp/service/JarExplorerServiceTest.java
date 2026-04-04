@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -106,5 +107,27 @@ class JarExplorerServiceTest {
         var result = service.readResource(testJar.toString(), "missing.yml");
         assertTrue(result.contains("Error"));
         assertTrue(result.contains("not found"));
+    }
+
+    @Test
+    void listResources_returnsNonClassFiles() {
+        var result = service.listResources(testJar.toString());
+        assertTrue(result.contains("application.properties"));
+        assertTrue(result.contains("data.bin"));
+        assertFalse(result.contains(".class"));
+    }
+
+    @Test
+    void listResources_emptyJarReturnsMessage() throws IOException {
+        // Create an empty JAR (no resources)
+        Path emptyJar = tempDir.resolve("empty.jar");
+        try (var jos = new java.util.jar.JarOutputStream(new java.io.FileOutputStream(emptyJar.toFile()))) {
+            // Add only a class file, no resources
+            jos.putNextEntry(new java.util.jar.JarEntry("com/example/Foo.class"));
+            jos.write(new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE});
+            jos.closeEntry();
+        }
+        var result = service.listResources(emptyJar.toString());
+        assertTrue(result.contains("No resource"));
     }
 }

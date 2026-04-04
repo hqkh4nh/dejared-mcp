@@ -58,6 +58,15 @@ public class ToolConfig {
         return jarExplorer.readResource(jarFilePath, resourcePath);
     }
 
+    @Tool(name = "dejared_list_resources",
+          description = "List all non-class resource files inside a JAR (config files, properties, XML, etc.) with their sizes. Use this to discover what resources exist before calling dejared_read_resource — avoids guessing file names.")
+    public String listResources(
+            @ToolParam(description = "Absolute path to the JAR file") String jarFilePath) {
+        String error = JarPathValidator.validate(jarFilePath);
+        if (error != null) return error;
+        return jarExplorer.listResources(jarFilePath);
+    }
+
     // --- Group 2: Hunting ---
 
     @Tool(name = "dejared_search_class",

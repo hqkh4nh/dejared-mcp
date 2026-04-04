@@ -166,6 +166,36 @@ public class JarExplorerService {
         }
     }
 
+    /**
+     * Lists all non-class resource files inside a JAR with their sizes.
+     *
+     * <p>Filters out {@code .class} files and directory entries, returning
+     * resource paths with sizes in a human-readable format. Use this to discover
+     * available resources before calling {@link #readResource}.
+     *
+     * @param jarFilePath absolute path to the JAR file
+     * @return one resource per line in the format {@code "path/to/resource (1234 bytes)"},
+     *         sorted alphabetically
+     */
+    public String listResources(String jarFilePath) {
+        try (var jarFile = new JarFile(jarFilePath)) {
+            List<String> resources = jarFile.stream()
+                    .filter(entry -> !entry.isDirectory())
+                    .filter(entry -> !entry.getName().endsWith(".class"))
+                    .sorted(Comparator.comparing(JarEntry::getName))
+                    .map(entry -> entry.getName() + " (" + entry.getSize() + " bytes)")
+                    .toList();
+
+            if (resources.isEmpty()) {
+                return "No resource files found in " + jarFilePath;
+            }
+
+            return String.join("\n", resources);
+        } catch (IOException e) {
+            return "Error: Failed to read JAR file: " + e.getMessage();
+        }
+    }
+
     private static String getExtension(String filename) {
         int dot = filename.lastIndexOf('.');
         return dot >= 0 ? filename.substring(dot + 1).toLowerCase() : "";
