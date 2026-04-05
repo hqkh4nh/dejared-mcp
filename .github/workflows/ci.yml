@@ -28,6 +28,16 @@ jobs:
             echo "::error::package.json version ($PKG_VERSION) does not match server.json packages[0].version ($SERVER_PKG_VERSION)"
             exit 1
           fi
+          PLUGIN_VERSION=$(node -p "require('./.claude-plugin/plugin.json').version")
+          if [ "$PKG_VERSION" != "$PLUGIN_VERSION" ]; then
+            echo "::error::package.json version ($PKG_VERSION) does not match plugin.json version ($PLUGIN_VERSION)"
+            exit 1
+          fi
+          MARKETPLACE_VERSION=$(node -p "require('./.claude-plugin/marketplace.json').plugins[0].version")
+          if [ "$PKG_VERSION" != "$MARKETPLACE_VERSION" ]; then
+            echo "::error::package.json version ($PKG_VERSION) does not match marketplace.json plugin version ($MARKETPLACE_VERSION)"
+            exit 1
+          fi
           echo "Versions match: $PKG_VERSION"
 
   test:
