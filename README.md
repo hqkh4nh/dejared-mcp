@@ -24,15 +24,9 @@ Most MCP-compatible tools use a JSON configuration like this:
 
 See below for tool-specific instructions.
 
-## Configuration by Tool
+## Installation and Configuration
 
-<details>
-<summary><strong>Claude Desktop</strong></summary>
-
-Edit the Claude Desktop config file:
-
-- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+**Standard config** works in most tools:
 
 ```json
 {
@@ -45,125 +39,25 @@ Edit the Claude Desktop config file:
 }
 ```
 
-Restart Claude Desktop after saving.
-
-</details>
-
 <details>
-<summary><strong>Claude Code (CLI)</strong></summary>
+<summary><strong>Amp</strong></summary>
 
-Run this command in your terminal:
+Add via the Amp VS Code extension settings screen or by updating your `settings.json` file:
+
+```json
+"amp.mcpServers": {
+  "dejared": {
+    "command": "npx",
+    "args": ["-y", "dejared-mcp"]
+  }
+}
+```
+
+**Amp CLI:**
 
 ```bash
-claude mcp add dejared -- npx -y dejared-mcp
+amp mcp add dejared -- npx -y dejared-mcp
 ```
-
-Or add it to your project's `.mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "dejared": {
-      "command": "npx",
-      "args": ["-y", "dejared-mcp"]
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary><strong>Claude Code Plugin (Marketplace)</strong></summary>
-
-You can also install dejared as a Claude Code plugin, which includes a `/jar-analysis` skill with structured workflows for exploring JARs:
-
-```bash
-claude plugin marketplace add HuynhKhanh1402/dejared-mcp
-claude plugin install dejared@dejared-mcp-marketplace
-```
-
-This installs both the MCP server and the `/jar-analysis` skill.
-
-</details>
-
-<details>
-<summary><strong>Cursor</strong></summary>
-
-Create or edit `.cursor/mcp.json` in your project root (project-level) or `~/.cursor/mcp.json` (global):
-
-```json
-{
-  "mcpServers": {
-    "dejared": {
-      "command": "npx",
-      "args": ["-y", "dejared-mcp"]
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary><strong>VS Code (GitHub Copilot)</strong></summary>
-
-Create or edit `.vscode/mcp.json` in your project root:
-
-```json
-{
-  "servers": {
-    "dejared": {
-      "command": "npx",
-      "args": ["-y", "dejared-mcp"]
-    }
-  }
-}
-```
-
-Or add to your VS Code `settings.json` for global availability.
-
-After saving, click the **Start** button that appears in the MCP config file, then use Agent mode in Copilot Chat.
-
-</details>
-
-<details>
-<summary><strong>JetBrains IDEs (GitHub Copilot)</strong></summary>
-
-Go to **Settings** > **Tools** > **AI Assistant** > **Model Context Protocol (MCP)**.
-
-Click **+ Add** and configure:
-
-- **Name**: `dejared`
-- **Transport**: `Stdio`
-- **Command**: `npx`
-- **Arguments**: `-y dejared-mcp`
-
-</details>
-
-<details>
-<summary><strong>Gemini CLI</strong></summary>
-
-**Option A** - CLI command:
-
-```bash
-gemini mcp add dejared npx -y dejared-mcp
-```
-
-**Option B** - Edit `~/.gemini/settings.json` (global) or `.gemini/settings.json` (project):
-
-```json
-{
-  "mcpServers": {
-    "dejared": {
-      "command": "npx",
-      "args": ["-y", "dejared-mcp"]
-    }
-  }
-}
-```
-
-Use `/mcp` in a Gemini CLI session to verify the server is connected.
 
 </details>
 
@@ -188,9 +82,63 @@ Or install through the MCP Store if available.
 </details>
 
 <details>
-<summary><strong>GitHub Copilot CLI</strong></summary>
+<summary><strong>Claude Code</strong></summary>
 
-**Option A** - Interactive:
+```bash
+claude mcp add dejared -- npx -y dejared-mcp
+```
+
+Or add it to your project's `.mcp.json` using the standard config above.
+
+**Plugin (Marketplace)** - installs both the MCP server and the `/jar-analysis` skill:
+
+```bash
+claude plugin marketplace add HuynhKhanh1402/dejared-mcp
+claude plugin install dejared@dejared-mcp-marketplace
+```
+
+</details>
+
+<details>
+<summary><strong>Claude Desktop</strong></summary>
+
+Edit the Claude Desktop config file:
+
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+Add the standard config above and restart Claude Desktop.
+
+</details>
+
+<details>
+<summary><strong>Cline</strong></summary>
+
+Add the standard config above to your MCP settings file.
+
+</details>
+
+<details>
+<summary><strong>Codex</strong></summary>
+
+```bash
+codex mcp add dejared npx "-y dejared-mcp"
+```
+
+Or edit `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.dejared]
+command = "npx"
+args = ["-y", "dejared-mcp"]
+```
+
+</details>
+
+<details>
+<summary><strong>Copilot CLI</strong></summary>
+
+Interactive:
 
 ```
 /mcp add
@@ -201,7 +149,7 @@ Then fill in:
 - **Server Type**: `STDIO`
 - **Command**: `npx -y dejared-mcp`
 
-**Option B** - Edit `~/.copilot/mcp-config.json`:
+Or edit `~/.copilot/mcp-config.json`:
 
 ```json
 {
@@ -219,36 +167,131 @@ Then fill in:
 </details>
 
 <details>
+<summary><strong>Cursor</strong></summary>
+
+Create or edit `.cursor/mcp.json` in your project root (project-level) or `~/.cursor/mcp.json` (global) using the standard config above.
+
+</details>
+
+<details>
+<summary><strong>Gemini CLI</strong></summary>
+
+```bash
+gemini mcp add dejared npx -y dejared-mcp
+```
+
+Or edit `~/.gemini/settings.json` (global) or `.gemini/settings.json` (project) using the standard config above.
+
+Use `/mcp` in a Gemini CLI session to verify the server is connected.
+
+</details>
+
+<details>
+<summary><strong>Goose</strong></summary>
+
+Go to **Advanced settings** > **Extensions** > **Add custom extension**. Name to your liking, use type `STDIO`, and set the command to `npx -y dejared-mcp`.
+
+</details>
+
+<details>
+<summary><strong>JetBrains IDEs</strong></summary>
+
+Go to **Settings** > **Tools** > **AI Assistant** > **Model Context Protocol (MCP)**.
+
+Click **+ Add** and configure:
+
+- **Name**: `dejared`
+- **Transport**: `Stdio`
+- **Command**: `npx`
+- **Arguments**: `-y dejared-mcp`
+
+</details>
+
+<details>
+<summary><strong>Kiro</strong></summary>
+
+Create or edit `.kiro/settings/mcp.json` using the standard config above.
+
+</details>
+
+<details>
+<summary><strong>opencode</strong></summary>
+
+Edit `~/.config/opencode/opencode.json`:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "dejared": {
+      "type": "local",
+      "command": ["npx", "-y", "dejared-mcp"],
+      "enabled": true
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Qodo Gen</strong></summary>
+
+Open [Qodo Gen](https://docs.qodo.ai/qodo-documentation/qodo-gen) chat panel in VS Code or IntelliJ > Connect more tools > + Add new MCP > Paste the standard config above > Save.
+
+</details>
+
+<details>
+<summary><strong>VS Code (GitHub Copilot)</strong></summary>
+
+Create or edit `.vscode/mcp.json` in your project root:
+
+```json
+{
+  "servers": {
+    "dejared": {
+      "command": "npx",
+      "args": ["-y", "dejared-mcp"]
+    }
+  }
+}
+```
+
+After saving, click the **Start** button that appears in the MCP config file, then use Agent mode in Copilot Chat.
+
+</details>
+
+<details>
+<summary><strong>Windsurf</strong></summary>
+
+Open Windsurf settings, navigate to MCP servers, and add a new server using the `command` type with `npx -y dejared-mcp`. Or add the standard config under `mcpServers` in your settings.
+
+</details>
+
+<details>
 <summary><strong>Pure Java (no Node.js required)</strong></summary>
 
 If you prefer to run the server JAR directly without Node.js:
 
 1. Download the latest JAR from [GitHub Releases](https://github.com/HuynhKhanh1402/dejared-mcp/releases).
 
-   Direct link pattern:
-   ```
-   https://github.com/HuynhKhanh1402/dejared-mcp/releases/download/v{VERSION}/dejared-mcp-{VERSION}.jar
-   ```
-
 2. Run it:
    ```bash
-   java -jar dejared-mcp-0.1.1.jar
+   java -jar dejared-mcp-0.1.3.jar
    ```
 
-3. Configure your MCP client to use the JAR directly instead of `npx`. For example, in Claude Desktop:
+3. Configure your MCP client to use the JAR directly instead of `npx`:
 
    ```json
    {
      "mcpServers": {
        "dejared": {
          "command": "java",
-         "args": ["-jar", "/path/to/dejared-mcp-0.1.1.jar"]
+         "args": ["-jar", "/path/to/dejared-mcp-0.1.3.jar"]
        }
      }
    }
    ```
-
-   Replace `/path/to/dejared-mcp-0.1.1.jar` with the actual path where you saved the JAR. This works with any MCP client that supports stdio transport.
 
 </details>
 
