@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'dev.khanh.mcp'
-version = '0.0.1'
+version = new groovy.json.JsonSlurper().parse(file("../package.json")).version
 description = 'dejared-mcp'
 
 java {
