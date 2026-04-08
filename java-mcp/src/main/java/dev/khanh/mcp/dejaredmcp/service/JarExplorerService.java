@@ -18,6 +18,10 @@ import java.util.stream.Collectors;
 /**
  * Explores the structure and contents of JAR files, providing package listing,
  * class discovery, search, and resource reading capabilities.
+ *
+ * <p>Security measures include zip bomb detection (compression ratio check),
+ * configurable resource size limits, and content-based text/binary detection
+ * via {@link TextProbe}.
  */
 @Service
 public class JarExplorerService {

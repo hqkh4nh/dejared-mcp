@@ -16,7 +16,9 @@ import java.util.jar.JarFile;
 
 /**
  * Orchestrates Java class decompilation across multiple {@link DecompilerEngine} implementations.
- * Provides caching, timeout enforcement, and engine selection.
+ *
+ * <p>Features: LRU result caching (configurable size), timeout enforcement per decompilation,
+ * engine selection by name with automatic fallback suggestions on failure.
  */
 @Service
 public class DecompilerService {

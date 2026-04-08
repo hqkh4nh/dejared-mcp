@@ -77,7 +77,8 @@ public class BytecodeAnalyzerService {
     }
 
     /**
-     * Dumps structural metadata for all direct classes in one or more packages using ASM.
+     * Dumps structural metadata for all classes directly in the specified packages
+     * (non-recursive — sub-packages are not included).
      *
      * <p>Accepts multiple package names to batch metadata extraction in a single call,
      * avoiding N+1 round-trips. Uses {@code ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG}
