@@ -1,7 +1,7 @@
 {
   "name": "dejared",
   "description": "Explore, analyze, and decompile Java JAR files with structured workflows.",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "author": {
     "name": "HuynhKhanh1402"
   },
