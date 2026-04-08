@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Console appender — always active, writes to stderr so MCP stdio is not disturbed -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- File appender — only when 'file-logging' Spring profile is active -->
+    <springProfile name="file-logging">
+        <timestamp key="startTime" datePattern="yyyy-MM-dd_HH-mm-ss"/>
+
+        <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+            <file>${dejared.log.dir}/dejared-${startTime}.log</file>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{40} - %msg%n%ex</pattern>
+            </encoder>
+        </appender>
+
+        <logger name="dev.khanh.mcp" level="${dejared.log.level:-INFO}" additivity="true"/>
+
+        <root level="WARN">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+        </root>
+    </springProfile>
+
+    <!-- Default root when file-logging profile is NOT active -->
+    <springProfile name="!file-logging">
+        <root level="WARN">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+</configuration>

@@ -19,11 +19,21 @@ repositories {
 }
 
 ext {
-    set('springAiVersion', "2.0.0-M3")
+    set('springAiVersion', "2.0.0-M4")
 }
 
 dependencies {
-    implementation 'org.springframework.ai:spring-ai-starter-mcp-server'
+    implementation('org.springframework.ai:spring-ai-starter-mcp-server') {
+        exclude group: 'com.knuddels', module: 'jtokkit'
+        exclude group: 'io.micrometer', module: 'micrometer-core'
+        exclude group: 'io.micrometer', module: 'micrometer-commons'
+        exclude group: 'io.micrometer', module: 'micrometer-observation'
+        exclude group: 'org.antlr', module: 'antlr4-runtime'
+        exclude group: 'org.antlr', module: 'antlr-runtime'
+        exclude group: 'org.pf4j', module: 'pf4j'
+        exclude group: 'org.springframework.ai', module: 'spring-ai-template-st'
+    }
+    implementation 'org.aspectj:aspectjweaver'
 
     // ASM bytecode analysis
     implementation 'org.ow2.asm:asm:9.9.1'
