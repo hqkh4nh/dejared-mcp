@@ -5,9 +5,10 @@ import dev.khanh.mcp.dejaredmcp.model.DecompileResult;
 /**
  * Contract for a Java decompiler engine.
  *
- * <p>Implementations wrap a specific decompiler library (e.g. CFR, Vineflower, Procyon)
- * and are auto-discovered by Spring as beans. The {@link DecompilerService} routes
- * requests to the appropriate engine by {@link #name()}.
+ * <p>Implementations wrap a specific decompiler library and are auto-discovered by Spring
+ * as beans. The {@link DecompilerService} routes requests to the appropriate engine
+ * by {@link #name()}. Three engines are provided: CFR (default, fast), Vineflower
+ * (modern Java features), and Procyon (obfuscated bytecode edge cases).
  */
 public interface DecompilerEngine {
 
