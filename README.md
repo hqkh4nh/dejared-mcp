@@ -11,9 +11,8 @@ Designed for AI-powered development tools, dejared-mcp connects your IDE or CLI 
 to inspect package structures, search bytecode, and decompile classes
 using CFR, Vineflower, or Procyon.
 
-[![Claude Code](https://img.shields.io/badge/Claude_Code-plugin-D97757?style=for-the-badge&logo=claude&logoColor=white)](#install-as-a-plugin-recommended)
-[![Codex](https://img.shields.io/badge/Codex-plugin-000000?style=for-the-badge&logo=openai&logoColor=white)](#install-as-a-plugin-recommended)
-[![Gemini CLI](https://img.shields.io/badge/Gemini_CLI-extension-4285F4?style=for-the-badge&logo=googlegemini&logoColor=white)](#install-as-a-plugin-recommended)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-plugin-D97757?style=for-the-badge&logo=claude&logoColor=white)](#claude-code)
+[![Codex](https://img.shields.io/badge/Codex-plugin-000000?style=for-the-badge&logo=openai&logoColor=white)](#codex)
 [![Install in VS Code](https://img.shields.io/badge/Install_in-VS_Code-0098FF?style=for-the-badge&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=dejared&config=%7B%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22dejared-mcp%22%5D%7D)
 [![Add to Cursor](https://img.shields.io/badge/Add_to-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=dejared&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImRlamFyZWQtbWNwIl19)
 
@@ -65,7 +64,7 @@ claude plugin marketplace add hqkh4nh/dejared-mcp
 claude plugin install dejared@dejared-mcp-marketplace
 ```
 
-Codex and Gemini CLI carry the same bundle. See
+Codex carries the same bundle. See
 [Install as a plugin](#install-as-a-plugin-recommended).
 Every other client takes the [plain MCP config](#install-as-an-mcp-server).
 
@@ -82,7 +81,7 @@ A plugin ships both parts together:
 | MCP server | The nine tools listed under [Features](#features) |
 | `jar-analysis` skill | Routes JAR questions to those tools, picks the cheap tool before the expensive one, and knows which decompiler to retry with |
 
-Three tools support that bundle today. Everything else is
+Two tools support that bundle today. Everything else is
 [MCP-only](#install-as-an-mcp-server).
 
 ### Claude Code
@@ -105,20 +104,6 @@ codex plugin add dejared@dejared-mcp-marketplace
 
 Start a new session afterwards so the bundled skill and server load. Check with
 `codex mcp list`. `dejared` should be listed as `enabled`.
-
-### Gemini CLI
-
-```bash
-gemini extensions install https://github.com/hqkh4nh/dejared-mcp --ref master
-```
-
-`--ref master` is required. Gemini CLI assumes a repository's default branch is
-`main`, and this one is `master`; without the flag the clone fails with a
-misleading `destination path '.' already exists`.
-
-Gemini CLI extensions have no skill field of their own, so the extension loads
-the same `SKILL.md` as its context file. The server and the guidance still
-arrive together.
 
 ## Install as an MCP server
 
@@ -400,7 +385,6 @@ dejared-mcp/
 ├── .claude-plugin/         # Claude Code plugin + marketplace manifests
 ├── .codex-plugin/          # Codex plugin manifest
 ├── .agents/plugins/        # Codex marketplace manifest
-├── gemini-extension.json   # Gemini CLI extension manifest
 ├── package.json            # npm package manifest
 └── server.json             # MCP Registry manifest
 ```

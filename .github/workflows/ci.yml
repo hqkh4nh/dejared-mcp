@@ -35,7 +35,6 @@ jobs:
           check ".claude-plugin/marketplace.json"   "require('./.claude-plugin/marketplace.json').plugins[0].version"
           check ".codex-plugin/plugin.json"         "require('./.codex-plugin/plugin.json').version"
           check ".agents/plugins/marketplace.json"  "require('./.agents/plugins/marketplace.json').plugins[0].version"
-          check "gemini-extension.json"             "require('./gemini-extension.json').version"
           [ "$FAILED" -eq 0 ] || exit 1
           echo "Versions match: $PKG_VERSION"
 
