@@ -1,6 +1,6 @@
 {
   "name": "dejared-mcp",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "mcpName": "io.github.hqkh4nh/dejared",
   "description": "Java decompiler MCP server for AI coding agents. Explore, search, and decompile JAR, WAR, EAR, and AAR bytecode with CFR, Vineflower, or Procyon.",
   "bin": {
@@ -11,6 +11,7 @@
     "lib/",
     "skills/",
     ".claude-plugin/",
+    ".codex-plugin/",
     ".mcp.json",
     "README.md",
     "LICENSE"
