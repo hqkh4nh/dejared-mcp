@@ -4,12 +4,13 @@
 [![npm downloads](https://img.shields.io/npm/dt/dejared-mcp?style=flat-square&color=cb3837&label=downloads)](https://www.npmjs.com/package/dejared-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 
-# dejared-mcp
+# dejared-mcp: Java decompiler MCP server
 
-A Model Context Protocol (MCP) server for exploring, analyzing, and decompiling Java JAR files.
-Designed for AI-powered development tools, dejared-mcp connects your IDE or CLI assistant
-to inspect package structures, search bytecode, and decompile classes
-using CFR, Vineflower, or Procyon.
+dejared-mcp is a Java decompiler and JAR analyzer that speaks the Model Context
+Protocol. It lets an AI coding agent (Claude Code, Codex, Cursor, VS Code)
+open a `.jar`, `.war`, `.ear`, or `.aar`, list what is inside, search its
+bytecode, and decompile any class back to Java source using CFR, Vineflower,
+or Procyon.
 
 [![Claude Code](https://img.shields.io/badge/Claude_Code-plugin-D97757?style=for-the-badge&logo=claude&logoColor=white)](#claude-code)
 [![Codex](https://img.shields.io/badge/Codex-plugin-000000?style=for-the-badge&logo=openai&logoColor=white)](#codex)
@@ -40,6 +41,12 @@ It provides nine tools organized into three categories: discovery, hunting,
 and deep analysis. AI assistants use these tools to navigate JAR file
 structures, search for classes and string literals in bytecode, and
 decompile `.class` files back to readable Java source code.
+
+Reach for it whenever a dependency ships without sources: reading what a
+third-party library actually does, recovering an `application.yml` or
+`MANIFEST.MF` embedded in a JAR, following a stack trace into a library you
+have no source for, or inspecting an obfuscated plugin or mod. It replaces
+hand-running `jar tf`, `unzip`, `javap`, or a desktop decompiler.
 
 Any ZIP-based Java archive works: `.jar`, `.war`, `.ear`, `.aar`, and
 Spring Boot fat-jars.

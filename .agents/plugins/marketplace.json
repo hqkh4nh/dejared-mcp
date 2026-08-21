@@ -6,7 +6,7 @@
   "plugins": [
     {
       "name": "dejared",
-      "description": "Explore, analyze, and decompile Java JAR files with structured workflows.",
+      "description": "Java decompiler and JAR analyzer. Decompile classes, search bytecode, and read resources embedded in JAR, WAR, EAR, and AAR archives.",
       "version": "1.1.0",
       "source": {
         "source": "local",

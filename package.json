@@ -2,7 +2,7 @@
   "name": "dejared-mcp",
   "version": "1.1.0",
   "mcpName": "io.github.hqkh4nh/dejared",
-  "description": "Explore, analyze, and decompile Java JAR files via MCP",
+  "description": "Java decompiler MCP server for AI coding agents. Explore, search, and decompile JAR, WAR, EAR, and AAR bytecode with CFR, Vineflower, or Procyon.",
   "bin": {
     "dejared-mcp": "bin/dejared-mcp.js"
   },
@@ -23,11 +23,23 @@
   },
   "keywords": [
     "mcp",
+    "mcp-server",
+    "model-context-protocol",
     "java",
-    "jar",
+    "java-decompiler",
     "decompiler",
+    "decompile",
+    "jar",
+    "war",
+    "aar",
+    "class-file",
     "bytecode",
-    "reverse-engineering"
+    "cfr",
+    "vineflower",
+    "procyon",
+    "reverse-engineering",
+    "claude-code",
+    "codex"
   ],
   "engines": {
     "node": ">=20"

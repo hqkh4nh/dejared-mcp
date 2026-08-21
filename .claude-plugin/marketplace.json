@@ -11,13 +11,13 @@
     {
       "name": "dejared",
       "source": "./",
-      "description": "Explore, analyze, and decompile Java JAR files with structured workflows.",
+      "description": "Java decompiler and JAR analyzer. Decompile classes, search bytecode, and read resources embedded in JAR, WAR, EAR, and AAR archives.",
       "version": "1.1.0",
       "author": {
         "name": "hqkh4nh"
       },
       "license": "MIT",
-      "keywords": ["java", "jar", "decompiler", "bytecode", "reverse-engineering", "mcp"],
+      "keywords": ["java", "java-decompiler", "jar", "war", "aar", "decompiler", "decompile", "bytecode", "class-file", "cfr", "vineflower", "procyon", "reverse-engineering", "mcp"],
       "category": "development"
     }
   ]
