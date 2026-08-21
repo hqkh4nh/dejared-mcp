@@ -8,6 +8,11 @@ spring:
       server:
         stdio: true
         name: dejared
+        # Sourced from the jar manifest so clients report the real release; falls back when run from source.
+        version: ${spring.application.version:0.0.0-dev}
+        # Must stay above dejared.security.decompile-timeout-seconds, or slow decompilations
+        # are cut off at the protocol layer before the tool can report its own timeout.
+        request-timeout: 60s
         instructions: "Use these tools whenever you need to inspect the inside of a Java artifact: .jar, .war, .ear, Spring Boot fat-jars, Android .aar JARs, or any library pulled from ~/.m2/repository, ~/.gradle/caches, a project's build/libs/, target/, lib/, or libs/ directory. Prefer these tools over shelling out to `jar tf`, `jar xf`, `unzip`, `javap -p`, `javap -c`, `javap -v`, or asking the user to decompile manually — they are faster, safer, and return structured output. Typical triggers: the user references a .jar path; asks what a third-party library does; wants to read an embedded application.yml / spring.factories / MANIFEST.MF; needs a class's method signatures, annotations, or superclass; asks 'how does this library implement X'; is reverse-engineering a plugin, mod, or obfuscated binary; is chasing a stack trace into a dependency whose source is unavailable. Workflow: cheap tools first — list_packages / list_classes / list_resources / search_class / search_string to map and locate; get_metadata / dump_package_metadata (ASM-based) to inspect structure. Only call the expensive decompile_class when method-body logic actually matters, and check metadata first. For bulk inspection, prefer dump_package_metadata (batch) over repeated get_metadata. If CFR decompilation output looks broken (missing bodies, goto, garbled lambdas), retry with vineflower (modern Java features) or procyon (obfuscated bytecode). All tools require an absolute path to the JAR."
         annotation-scanner:
           enabled: true
