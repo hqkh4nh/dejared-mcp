@@ -52,6 +52,29 @@ class JarPathValidatorTest {
     }
 
     @Test
+    void acceptsWarEarAndAarArchives() throws IOException {
+        for (String ext : new String[]{".war", ".ear", ".aar"}) {
+            Path archive = tempDir.resolve("bundle" + ext);
+            Files.write(archive, new byte[]{0x50, 0x4B, 0x03, 0x04});
+            assertNull(JarPathValidator.validate(archive.toString()), ext + " should be accepted");
+        }
+    }
+
+    @Test
+    void acceptsUppercaseExtension() throws IOException {
+        Path jar = tempDir.resolve("Upper.JAR");
+        Files.write(jar, new byte[]{0x50, 0x4B, 0x03, 0x04});
+        assertNull(JarPathValidator.validate(jar.toString()));
+    }
+
+    @Test
+    void rejectsPlainZipArchive() throws IOException {
+        Path zip = tempDir.resolve("archive.zip");
+        Files.write(zip, new byte[]{0x50, 0x4B, 0x03, 0x04});
+        assertNotNull(JarPathValidator.validate(zip.toString()));
+    }
+
+    @Test
     void rejectsPathTraversal() {
         String result = JarPathValidator.validate("/some/../etc/passwd.jar");
         assertNotNull(result);

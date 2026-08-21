@@ -2,6 +2,8 @@ package dev.khanh.mcp.dejaredmcp.validation;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * Validates user-supplied paths, class names, package names, and resource paths
@@ -11,6 +13,9 @@ import java.nio.file.Path;
  * Error messages are sanitized — they never include user-supplied paths or file system details.
  */
 public final class JarPathValidator {
+
+    /** Archive types that {@link java.util.jar.JarFile} can open — all are ZIP containers holding {@code .class} entries. */
+    private static final Set<String> SUPPORTED_EXTENSIONS = Set.of(".jar", ".war", ".ear", ".aar");
 
     private static final String CLASS_NAME_PATTERN =
             "^[a-zA-Z_$][a-zA-Z0-9_$]*(\\.[a-zA-Z_$][a-zA-Z0-9_$]*)*$";
@@ -24,7 +29,8 @@ public final class JarPathValidator {
      * Validates the given JAR file path.
      *
      * <p>Checks: non-null/blank, absolute path, normalizes to resolve traversal,
-     * resolves symlinks via {@code toRealPath()}, and verifies {@code .jar} extension.
+     * resolves symlinks via {@code toRealPath()}, and verifies the extension is one
+     * of {@link #SUPPORTED_EXTENSIONS}.
      *
      * @param jarFilePath the absolute path to validate
      * @return {@code null} if valid, or a sanitized error message
@@ -52,8 +58,9 @@ public final class JarPathValidator {
             return "Error: File not found.";
         }
 
-        if (!realPath.toString().toLowerCase().endsWith(".jar")) {
-            return "Error: Not a .jar file.";
+        String lowerPath = realPath.toString().toLowerCase(Locale.ROOT);
+        if (SUPPORTED_EXTENSIONS.stream().noneMatch(lowerPath::endsWith)) {
+            return "Error: Not a supported archive. Expected .jar, .war, .ear, or .aar.";
         }
 
         return null;
