@@ -12,7 +12,9 @@ to inspect package structures, search bytecode, and decompile classes
 using CFR, Vineflower, or Procyon.
 
 [![Install in VS Code](https://img.shields.io/badge/Install_in-VS_Code-0098FF?style=for-the-badge&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=dejared&config=%7B%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22dejared-mcp%22%5D%7D)
-[![Add to Cursor](https://img.shields.io/badge/Add_to-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](cursor://anysphere.cursor-deeplink/mcp/install?name=dejared&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImRlamFyZWQtbWNwIl19)
+[![Add to Cursor](https://img.shields.io/badge/Add_to-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=dejared&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImRlamFyZWQtbWNwIl19)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-D97757?style=for-the-badge&logo=claude&logoColor=white)](#install-from-the-command-line)
+[![Codex](https://img.shields.io/badge/Codex-000000?style=for-the-badge&logo=openai&logoColor=white)](#install-from-the-command-line)
 
 ## Table of Contents
 
@@ -125,6 +127,8 @@ Most clients accept this standard config:
   }
 }
 ```
+
+### Install from the command line
 
 If your tool has a CLI, one line is enough:
 
