@@ -46,13 +46,19 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          # Trusted publishing needs Node 22.14+ and the npm 11.5.1+ that ships with it.
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Verify npm supports trusted publishing
+        run: |
+          npm install -g npm@latest
+          npm --version
+
+      # Authenticates over OIDC via the id-token permission above, so no npm token
+      # is involved. Also attaches a provenance attestation automatically.
       - name: Publish to npm
         run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Install mcp-publisher
         run: |
