@@ -18,29 +18,25 @@ jobs:
       - name: Reject typographic dashes
         run: python3 .github/scripts/check-dashes.py
 
-      - name: Verify package.json and server.json versions match
+      - name: Verify every manifest carries the same version
         run: |
           PKG_VERSION=$(node -p "require('./package.json').version")
-          SERVER_VERSION=$(node -p "require('./server.json').version")
-          SERVER_PKG_VERSION=$(node -p "require('./server.json').packages[0].version")
-          if [ "$PKG_VERSION" != "$SERVER_VERSION" ]; then
-            echo "::error::package.json version ($PKG_VERSION) does not match server.json version ($SERVER_VERSION)"
-            exit 1
-          fi
-          if [ "$PKG_VERSION" != "$SERVER_PKG_VERSION" ]; then
-            echo "::error::package.json version ($PKG_VERSION) does not match server.json packages[0].version ($SERVER_PKG_VERSION)"
-            exit 1
-          fi
-          PLUGIN_VERSION=$(node -p "require('./.claude-plugin/plugin.json').version")
-          if [ "$PKG_VERSION" != "$PLUGIN_VERSION" ]; then
-            echo "::error::package.json version ($PKG_VERSION) does not match plugin.json version ($PLUGIN_VERSION)"
-            exit 1
-          fi
-          MARKETPLACE_VERSION=$(node -p "require('./.claude-plugin/marketplace.json').plugins[0].version")
-          if [ "$PKG_VERSION" != "$MARKETPLACE_VERSION" ]; then
-            echo "::error::package.json version ($PKG_VERSION) does not match marketplace.json plugin version ($MARKETPLACE_VERSION)"
-            exit 1
-          fi
+          FAILED=0
+          check() {
+            ACTUAL=$(node -p "$2" 2>/dev/null || echo "<unreadable>")
+            if [ "$ACTUAL" != "$PKG_VERSION" ]; then
+              echo "::error::$1 is at $ACTUAL, package.json is at $PKG_VERSION"
+              FAILED=1
+            fi
+          }
+          check "server.json"                       "require('./server.json').version"
+          check "server.json packages[0]"           "require('./server.json').packages[0].version"
+          check ".claude-plugin/plugin.json"        "require('./.claude-plugin/plugin.json').version"
+          check ".claude-plugin/marketplace.json"   "require('./.claude-plugin/marketplace.json').plugins[0].version"
+          check ".codex-plugin/plugin.json"         "require('./.codex-plugin/plugin.json').version"
+          check ".agents/plugins/marketplace.json"  "require('./.agents/plugins/marketplace.json').plugins[0].version"
+          check "gemini-extension.json"             "require('./gemini-extension.json').version"
+          [ "$FAILED" -eq 0 ] || exit 1
           echo "Versions match: $PKG_VERSION"
 
   test:

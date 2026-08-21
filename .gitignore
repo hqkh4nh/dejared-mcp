@@ -2,3 +2,4 @@ node_modules/
 *.log
 .jar-cache/
 .idea/
+.claude/settings.local.json

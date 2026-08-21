@@ -1,0 +1,12 @@
+{
+  "name": "dejared",
+  "version": "1.1.0",
+  "description": "Explore, analyze, and decompile Java JAR files with structured workflows.",
+  "mcpServers": {
+    "dejared": {
+      "command": "npx",
+      "args": ["-y", "dejared-mcp"]
+    }
+  },
+  "contextFileName": "skills/jar-analysis/SKILL.md"
+}
