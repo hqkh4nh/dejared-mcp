@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <!-- Console appender — always active, writes to stderr so MCP stdio is not disturbed -->
+    <!-- Console appender: always active, writes to stderr so MCP stdio is not disturbed -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <target>System.err</target>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -12,7 +12,7 @@
         </encoder>
     </appender>
 
-    <!-- File appender — only when 'file-logging' Spring profile is active -->
+    <!-- File appender: only when 'file-logging' Spring profile is active -->
     <springProfile name="file-logging">
         <timestamp key="startTime" datePattern="yyyy-MM-dd_HH-mm-ss"/>
 

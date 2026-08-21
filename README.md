@@ -154,10 +154,10 @@ Drop the standard config into the file for your tool:
 | JetBrains IDEs | Settings → Tools → AI Assistant → Model Context Protocol (MCP) |
 | Qodo Gen | Chat panel → Connect more tools → + Add new MCP |
 
-A few setups need more than the standard config — expand those below.
+A few setups need more than the standard config. Expand those below.
 
 <details>
-<summary><strong>Codex</strong> — TOML instead of JSON</summary>
+<summary><strong>Codex</strong>: TOML instead of JSON</summary>
 
 ```bash
 codex mcp add dejared -- npx -y dejared-mcp
@@ -181,7 +181,7 @@ DEJARED_JAVA_PATH = "/path/to/java"
 </details>
 
 <details>
-<summary><strong>VS Code (GitHub Copilot)</strong> — uses <code>servers</code>, not <code>mcpServers</code></summary>
+<summary><strong>VS Code (GitHub Copilot)</strong>: uses <code>servers</code>, not <code>mcpServers</code></summary>
 
 Create or edit `.vscode/mcp.json`:
 
@@ -201,7 +201,7 @@ After saving, click **Start** above the server entry, then use Agent mode in Cop
 </details>
 
 <details>
-<summary><strong>opencode</strong> — command is an array</summary>
+<summary><strong>opencode</strong>: command is an array</summary>
 
 Edit `~/.config/opencode/opencode.json`:
 
@@ -221,7 +221,7 @@ Edit `~/.config/opencode/opencode.json`:
 </details>
 
 <details>
-<summary><strong>Claude Code plugin</strong> — also installs the <code>/jar-analysis</code> skill</summary>
+<summary><strong>Claude Code plugin</strong>: also installs the <code>/jar-analysis</code> skill</summary>
 
 ```bash
 claude plugin marketplace add hqkh4nh/dejared-mcp

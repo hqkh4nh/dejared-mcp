@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * Decompiler engine backed by CFR (Class File Reader).
  *
- * <p>CFR is the default decompiler engine — fast and handles most Java bytecode well.
+ * <p>CFR is the default decompiler engine: fast, and handles most Java bytecode well.
  * Uses an in-memory {@link ClassFileSource} to feed class bytes directly to CFR's
  * driver API, and captures output via a custom {@link OutputSinkFactory}.
  *

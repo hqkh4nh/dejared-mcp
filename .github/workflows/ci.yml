@@ -15,6 +15,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Reject typographic dashes
+        run: python3 .github/scripts/check-dashes.py
+
       - name: Verify package.json and server.json versions match
         run: |
           PKG_VERSION=$(node -p "require('./package.json').version")

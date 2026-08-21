@@ -145,7 +145,7 @@ public class ToolConfig {
 
     @McpTool(name = "dejared_dump_package_metadata",
              title = "Dump Package Metadata",
-             description = "Dump structural metadata (annotations, fields, methods) for all classes in one or more packages via ASM bytecode analysis. Accepts multiple packages in one call — prefer this over repeated `javap -p` invocations.",
+             description = "Dump structural metadata (annotations, fields, methods) for all classes in one or more packages via ASM bytecode analysis. Accepts multiple packages in one call. Prefer this over repeated `javap -p` invocations.",
              annotations = @McpTool.McpAnnotations(
                  readOnlyHint = true,
                  destructiveHint = false,
@@ -162,7 +162,7 @@ public class ToolConfig {
 
     @McpTool(name = "dejared_get_metadata",
              title = "Get Class Metadata",
-             description = "Extract class metadata via ASM bytecode analysis — superclass, interfaces, annotations, fields, and method signatures. Much faster than decompilation. Use instead of `javap -p <class>`.",
+             description = "Extract class metadata via ASM bytecode analysis: superclass, interfaces, annotations, fields, and method signatures. Much faster than decompilation. Use instead of `javap -p <class>`.",
              annotations = @McpTool.McpAnnotations(
                  readOnlyHint = true,
                  destructiveHint = false,

@@ -6,7 +6,7 @@ import java.util.List;
  * Structural metadata of a Java class extracted from bytecode via ASM.
  *
  * <p>Contains the class hierarchy, annotations, fields, and methods without
- * performing a full decompilation — significantly faster for inspection.
+ * performing a full decompilation, so it is significantly faster for inspection.
  *
  * @param className   fully-qualified class name
  * @param superClass  fully-qualified superclass name

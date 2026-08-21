@@ -17,11 +17,11 @@ import java.util.jar.Manifest;
  * <p>Vineflower excels at modern Java features (records, sealed classes, pattern matching).
  * Configuration options:
  * <ul>
- *   <li>{@code rbr=1} — remove bridge methods</li>
- *   <li>{@code dgs=1} — decompile generic signatures</li>
- *   <li>{@code din=1} — decompile inner classes</li>
- *   <li>{@code asc=1} — ASCII string characters</li>
- *   <li>{@code hdc=1} — hide default constructor</li>
+ *   <li>{@code rbr=1}: remove bridge methods</li>
+ *   <li>{@code dgs=1}: decompile generic signatures</li>
+ *   <li>{@code din=1}: decompile inner classes</li>
+ *   <li>{@code asc=1}: ASCII string characters</li>
+ *   <li>{@code hdc=1}: hide default constructor</li>
  * </ul>
  *
  * @see <a href="https://github.com/Vineflower/vineflower">Vineflower on GitHub</a>

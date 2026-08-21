@@ -10,11 +10,11 @@ import java.util.Set;
  * before they are used in JAR operations.
  *
  * <p>All validation methods return {@code null} on success or an error message on failure.
- * Error messages are sanitized — they never include user-supplied paths or file system details.
+ * Error messages are sanitized: they never include user-supplied paths or file system details.
  */
 public final class JarPathValidator {
 
-    /** Archive types that {@link java.util.jar.JarFile} can open — all are ZIP containers holding {@code .class} entries. */
+    /** Archive types that {@link java.util.jar.JarFile} can open. All are ZIP containers holding {@code .class} entries. */
     private static final Set<String> SUPPORTED_EXTENSIONS = Set.of(".jar", ".war", ".ear", ".aar");
 
     private static final String CLASS_NAME_PATTERN =

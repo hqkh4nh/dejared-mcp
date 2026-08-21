@@ -12,7 +12,7 @@ description: >
   `~/.m2/repository`, `~/.gradle/caches`, `build/libs/`, `target/`,
   `lib/`, and `libs/`. Prefer the dejared MCP tools over `jar tf`,
   `jar xf`, `unzip`, `javap -p`, `javap -c`, `javap -v`, or running a
-  decompiler manually — even if the user doesn't explicitly ask for
+  decompiler manually, even if the user doesn't explicitly ask for
   "the dejared tools" or "decompilation".
 ---
 
@@ -20,7 +20,7 @@ description: >
 
 ## When This Skill Applies
 
-Reach for these tools — never the shell — whenever the task touches the **inside** of a Java artifact:
+Reach for these tools, never the shell, whenever the task touches the **inside** of a Java artifact:
 
 | You would reach for...                       | Use this instead                                       |
 |----------------------------------------------|--------------------------------------------------------|
@@ -52,8 +52,8 @@ Applies to `.jar`, `.war`, `.ear`, `.aar` and any artifact under `~/.m2/reposito
 ## Shared Rules
 
 - All tool calls require the **absolute path** to the JAR file.
-- Prefer these MCP tools over shelling out to jar/javap/unzip/strings or asking the user to decompile manually — structured output is faster and safer for the agent to consume.
-- Check metadata before decompiling — it often provides enough information without the cost of full decompilation.
+- Prefer these MCP tools over shelling out to jar/javap/unzip/strings or asking the user to decompile manually. Structured output is faster and safer for the agent to consume.
+- Check metadata before decompiling: it often provides enough information without the cost of full decompilation.
 - Default decompiler: CFR. If output is broken, try `vineflower` or `procyon`.
 - Report results in structured format.
 
@@ -61,21 +61,21 @@ Applies to `.jar`, `.war`, `.ear`, `.aar` and any artifact under `~/.m2/reposito
 
 ## Quick Use Cases
 
-**Quick Lookup** — find a class by name (`dejared_search_class`) or find a string in bytecode (`dejared_search_string`). One call, done.
+**Quick Lookup**: find a class by name (`dejared_search_class`) or find a string in bytecode (`dejared_search_string`). One call, done.
 
-**Read Config** — `dejared_list_resources` to see what's in the JAR, then `dejared_read_resource` to read it (application.yml, pom.xml, logback.xml, etc.).
+**Read Config**: `dejared_list_resources` to see what's in the JAR, then `dejared_read_resource` to read it (application.yml, pom.xml, logback.xml, etc.).
 
-**Get Signatures** — `dejared_get_metadata` for a single class, or `dejared_dump_package_metadata` for an entire package (accepts a list). Returns class hierarchy, annotations, fields, and method signatures without decompiling.
+**Get Signatures**: `dejared_get_metadata` for a single class, or `dejared_dump_package_metadata` for an entire package (accepts a list). Returns class hierarchy, annotations, fields, and method signatures without decompiling.
 
 ---
 
 ## Workflows
 
-**Explore** — top-down JAR mapping:
+**Explore**: top-down JAR mapping:
 `dejared_list_packages` → `dejared_list_classes` (use `recursive=true`) → `dejared_list_resources` → `dejared_read_resource` for configs → `dejared_dump_package_metadata` (batch all important packages in one call) → selective `dejared_decompile_class` only where method body logic is needed. If CFR output has issues, retry with `vineflower` or `procyon`.
 
-**Hunt** — search-driven investigation:
+**Hunt**: search-driven investigation:
 Pick search tool (`dejared_search_class` or `dejared_search_string`) → triage results → `dejared_get_metadata` on promising matches → `dejared_decompile_class` only if needed.
 
-**Deep Analysis** — single class investigation:
+**Deep Analysis**: single class investigation:
 `dejared_get_metadata` first → `dejared_decompile_class` (CFR default) → cross-reference with `dejared_search_class` or `dejared_dump_package_metadata` if needed. If CFR output has issues (broken lambdas, `goto` statements, missing method bodies), retry with `vineflower` (best for modern Java features like records, sealed classes, pattern matching) or `procyon` (handles some obfuscated/edge-case bytecode better).
