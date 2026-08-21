@@ -88,6 +88,11 @@ public class JarExplorerService {
      * @return formatted list of class names, or an error message
      */
     public String listClasses(String jarFilePath, String packageName, boolean recursive) {
+        String packageError = JarPathValidator.validatePackageName(packageName);
+        if (packageError != null) {
+            return packageError;
+        }
+
         try (var jarFile = new JarFile(jarFilePath)) {
             String packagePath = packageName.replace('.', '/') + "/";
 

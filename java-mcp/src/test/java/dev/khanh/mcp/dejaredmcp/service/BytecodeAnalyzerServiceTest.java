@@ -121,6 +121,18 @@ class BytecodeAnalyzerServiceTest {
     }
 
     @Test
+    void searchString_rejectsNullQuery() {
+        var result = service.searchString(testJar.toString(), null);
+        assertTrue(result.startsWith("Error:"));
+    }
+
+    @Test
+    void searchString_rejectsBlankQuery() {
+        var result = service.searchString(testJar.toString(), "   ");
+        assertTrue(result.startsWith("Error:"));
+    }
+
+    @Test
     void searchString_noMatches() {
         var result = service.searchString(testJar.toString(), "zzz_nonexistent_zzz");
         assertTrue(result.contains("No strings found"));

@@ -167,6 +167,10 @@ public class BytecodeAnalyzerService {
      * @return matching strings grouped by class name, or an error message
      */
     public String searchString(String jarFilePath, String query) {
+        if (query == null || query.isBlank()) {
+            return "Error: Search query must not be null or blank.";
+        }
+
         String lowerQuery = query.toLowerCase();
 
         try (var jarFile = new JarFile(jarFilePath)) {

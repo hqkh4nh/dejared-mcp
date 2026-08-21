@@ -48,6 +48,18 @@ class JarExplorerServiceTest {
     }
 
     @Test
+    void listClasses_rejectsNullPackageName() {
+        var result = service.listClasses(testJar.toString(), null);
+        assertTrue(result.startsWith("Error:"));
+    }
+
+    @Test
+    void listClasses_rejectsMalformedPackageName() {
+        var result = service.listClasses(testJar.toString(), "com/example/hello");
+        assertTrue(result.startsWith("Error:"));
+    }
+
+    @Test
     void listClasses_recursiveIncludesSubPackages() {
         var result = service.listClasses(testJar.toString(), "com.example", true);
         assertTrue(result.contains("com.example.hello.HelloWorld"));
