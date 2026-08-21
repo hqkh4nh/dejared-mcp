@@ -109,8 +109,12 @@ Start a new session afterwards so the bundled skill and server load. Check with
 ### Gemini CLI
 
 ```bash
-gemini extensions install https://github.com/hqkh4nh/dejared-mcp
+gemini extensions install https://github.com/hqkh4nh/dejared-mcp --ref master
 ```
+
+`--ref master` is required. Gemini CLI assumes a repository's default branch is
+`main`, and this one is `master`; without the flag the clone fails with a
+misleading `destination path '.' already exists`.
 
 Gemini CLI extensions have no skill field of their own, so the extension loads
 the same `SKILL.md` as its context file. The server and the guidance still
