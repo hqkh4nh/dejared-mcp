@@ -12,7 +12,7 @@
       "name": "dejared",
       "source": "./",
       "description": "Java decompiler and JAR analyzer. Decompile classes, search bytecode, and read resources embedded in JAR, WAR, EAR, and AAR archives.",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "author": {
         "name": "hqkh4nh"
       },
