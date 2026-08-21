@@ -11,19 +11,21 @@ Designed for AI-powered development tools, dejared-mcp connects your IDE or CLI 
 to inspect package structures, search bytecode, and decompile classes
 using CFR, Vineflower, or Procyon.
 
+[![Claude Code](https://img.shields.io/badge/Claude_Code-plugin-D97757?style=for-the-badge&logo=claude&logoColor=white)](#install-as-a-plugin-recommended)
+[![Codex](https://img.shields.io/badge/Codex-plugin-000000?style=for-the-badge&logo=openai&logoColor=white)](#install-as-a-plugin-recommended)
+[![Gemini CLI](https://img.shields.io/badge/Gemini_CLI-extension-4285F4?style=for-the-badge&logo=googlegemini&logoColor=white)](#install-as-a-plugin-recommended)
 [![Install in VS Code](https://img.shields.io/badge/Install_in-VS_Code-0098FF?style=for-the-badge&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=dejared&config=%7B%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22dejared-mcp%22%5D%7D)
 [![Add to Cursor](https://img.shields.io/badge/Add_to-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/install-mcp?name=dejared&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImRlamFyZWQtbWNwIl19)
-[![Claude Code](https://img.shields.io/badge/Claude_Code-D97757?style=for-the-badge&logo=claude&logoColor=white)](#install-from-the-command-line)
-[![Codex](https://img.shields.io/badge/Codex-000000?style=for-the-badge&logo=openai&logoColor=white)](#install-from-the-command-line)
 
 ## Table of Contents
 
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
+- [Install as a plugin (recommended)](#install-as-a-plugin-recommended)
+- [Install as an MCP server](#install-as-an-mcp-server)
 - [Features](#features)
 - [Decompiler Engines](#decompiler-engines)
-- [Installation and Configuration](#installation-and-configuration)
 - [Custom Java Path](#custom-java-path)
 - [Server Configuration](#server-configuration)
 - [How It Works](#how-it-works)
@@ -54,66 +56,70 @@ transport.
 
 ## Quick Start
 
-Add the following to your MCP client configuration:
+The best install is the plugin. One command pair gives your agent both halves:
+the **nine MCP tools**, and the **`jar-analysis` skill** that tells it when to
+reach for them instead of shelling out to `jar tf`, `unzip`, or `javap`.
 
-```json
-{
-  "mcpServers": {
-    "dejared": {
-      "command": "npx",
-      "args": ["-y", "dejared-mcp"]
-    }
-  }
-}
+```bash
+claude plugin marketplace add hqkh4nh/dejared-mcp
+claude plugin install dejared@dejared-mcp-marketplace
 ```
 
-See [Installation and Configuration](#installation-and-configuration)
-for tool-specific instructions.
+Codex and Gemini CLI carry the same bundle. See
+[Install as a plugin](#install-as-a-plugin-recommended).
+Every other client takes the [plain MCP config](#install-as-an-mcp-server).
 
-## Features
+## Install as a plugin (recommended)
 
-### Discovery
+The MCP server on its own gives an agent nine tools. It does not tell the agent
+*when* to use them, so most agents keep reaching for `jar tf`, `unzip -p`, and
+`javap -p` out of habit and never touch the tools you installed.
 
-Browse and read JAR contents.
+A plugin ships both parts together:
 
-| Tool | Description |
-|------|-------------|
-| `dejared_list_packages` | List all packages with class counts |
-| `dejared_list_classes` | List classes in a specific package |
-| `dejared_list_resources` | List non-class resource files |
-| `dejared_read_resource` | Read text resources (YAML, XML, properties, JSON, and others) |
+| Part | What it does |
+|------|--------------|
+| MCP server | The nine tools listed under [Features](#features) |
+| `jar-analysis` skill | Routes JAR questions to those tools, picks the cheap tool before the expensive one, and knows which decompiler to retry with |
 
-### Hunting
+Three tools support that bundle today. Everything else is
+[MCP-only](#install-as-an-mcp-server).
 
-Search inside JAR files.
+### Claude Code
 
-| Tool | Description |
-|------|-------------|
-| `dejared_search_class` | Search classes by name |
-| `dejared_search_string` | Search string literals in bytecode (URLs, SQL, error messages) |
+```bash
+claude plugin marketplace add hqkh4nh/dejared-mcp
+claude plugin install dejared@dejared-mcp-marketplace
+```
 
-### Deep Analysis
+Inside a session, the same commands work as `/plugin marketplace add ...` and
+`/plugin install ...`. If the install summary says `Run /reload-plugins to
+activate`, run it.
 
-Inspect metadata and decompile classes.
+### Codex
 
-| Tool | Description |
-|------|-------------|
-| `dejared_get_metadata` | Extract class metadata via ASM (fast, no decompilation) |
-| `dejared_dump_package_metadata` | Batch metadata extraction for entire packages |
-| `dejared_decompile_class` | Decompile `.class` files to Java source code |
+```bash
+codex plugin marketplace add hqkh4nh/dejared-mcp
+codex plugin add dejared@dejared-mcp-marketplace
+```
 
-## Decompiler Engines
+Start a new session afterwards so the bundled skill and server load. Check with
+`codex mcp list`. `dejared` should be listed as `enabled`.
 
-dejared-mcp supports three decompiler engines. The engine can be
-specified per request via the `dejared_decompile_class` tool.
+### Gemini CLI
 
-| Engine | Description |
-|--------|-------------|
-| **CFR** (default) | Reliable general-purpose decompiler |
-| **Vineflower** | Modern fork of FernFlower, handles newer Java features well |
-| **Procyon** | Alternative engine, can handle some edge cases better |
+```bash
+gemini extensions install https://github.com/hqkh4nh/dejared-mcp
+```
 
-## Installation and Configuration
+Gemini CLI extensions have no skill field of their own, so the extension loads
+the same `SKILL.md` as its context file. The server and the guidance still
+arrive together.
+
+## Install as an MCP server
+
+For clients without a plugin system. You get the tools, but not the skill that
+steers the agent toward them.
 
 Most clients accept this standard config:
 
@@ -128,7 +134,7 @@ Most clients accept this standard config:
 }
 ```
 
-### Install from the command line
+### From the command line
 
 If your tool has a CLI, one line is enough:
 
@@ -225,16 +231,6 @@ Edit `~/.config/opencode/opencode.json`:
 </details>
 
 <details>
-<summary><strong>Claude Code plugin</strong>: also installs the <code>/jar-analysis</code> skill</summary>
-
-```bash
-claude plugin marketplace add hqkh4nh/dejared-mcp
-claude plugin install dejared@dejared-mcp-marketplace
-```
-
-</details>
-
-<details>
 <summary><strong>Pure Java (no Node.js required)</strong></summary>
 
 If you prefer to run the server JAR directly without Node.js:
@@ -260,6 +256,49 @@ If you prefer to run the server JAR directly without Node.js:
    ```
 
 </details>
+
+## Features
+
+### Discovery
+
+Browse and read JAR contents.
+
+| Tool | Description |
+|------|-------------|
+| `dejared_list_packages` | List all packages with class counts |
+| `dejared_list_classes` | List classes in a specific package |
+| `dejared_list_resources` | List non-class resource files |
+| `dejared_read_resource` | Read text resources (YAML, XML, properties, JSON, and others) |
+
+### Hunting
+
+Search inside JAR files.
+
+| Tool | Description |
+|------|-------------|
+| `dejared_search_class` | Search classes by name |
+| `dejared_search_string` | Search string literals in bytecode (URLs, SQL, error messages) |
+
+### Deep Analysis
+
+Inspect metadata and decompile classes.
+
+| Tool | Description |
+|------|-------------|
+| `dejared_get_metadata` | Extract class metadata via ASM (fast, no decompilation) |
+| `dejared_dump_package_metadata` | Batch metadata extraction for entire packages |
+| `dejared_decompile_class` | Decompile `.class` files to Java source code |
+
+## Decompiler Engines
+
+dejared-mcp supports three decompiler engines. The engine can be
+specified per request via the `dejared_decompile_class` tool.
+
+| Engine | Description |
+|--------|-------------|
+| **CFR** (default) | Reliable general-purpose decompiler |
+| **Vineflower** | Modern fork of FernFlower, handles newer Java features well |
+| **Procyon** | Alternative engine, can handle some edge cases better |
 
 ## Custom Java Path
 
@@ -328,7 +367,7 @@ Java 17 or later. A JRE is sufficient; you do not need a full JDK.
 
 Yes. Download the JAR from GitHub Releases and run it directly
 with `java -jar`. See the "Pure Java" section under
-[Installation and Configuration](#installation-and-configuration).
+[Install as an MCP server](#install-as-an-mcp-server).
 
 ## Contributing
 
@@ -340,17 +379,26 @@ Contributions are welcome. Please follow these guidelines:
 4. Open a pull request against `master` with a description of what
    the change does and why.
 
+Every manifest listed under [Project Structure](#project-structure) carries a
+`version` field, and CI fails the build if any of them drifts from
+`package.json`. Bump them together.
+
 ### Project Structure
 
 ```
 dejared-mcp/
-├── bin/            # Node.js CLI entry point
-├── lib/            # Node.js wrapper (JAR download and process management)
-├── java-mcp/       # Java MCP server (Spring Boot, Gradle)
+├── bin/                    # Node.js CLI entry point
+├── lib/                    # Node.js wrapper (JAR download and process management)
+├── java-mcp/               # Java MCP server (Spring Boot, Gradle)
 │   └── src/
-├── skills/         # Claude Code plugin skills
-├── package.json    # npm package manifest
-└── server.json     # MCP Registry manifest
+├── skills/                 # Agent skills, shared by every plugin manifest below
+├── .mcp.json               # MCP server definition, shared the same way
+├── .claude-plugin/         # Claude Code plugin + marketplace manifests
+├── .codex-plugin/          # Codex plugin manifest
+├── .agents/plugins/        # Codex marketplace manifest
+├── gemini-extension.json   # Gemini CLI extension manifest
+├── package.json            # npm package manifest
+└── server.json             # MCP Registry manifest
 ```
 
 ### Building from Source
