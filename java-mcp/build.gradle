@@ -56,3 +56,9 @@ dependencyManagement {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+// Spring Boot builds a plain, non-executable jar alongside the fat one. Only the
+// fat jar is ever shipped, so stop producing a lookalike that cannot be run.
+tasks.named('jar') {
+    enabled = false
+}

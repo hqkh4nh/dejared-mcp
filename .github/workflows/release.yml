@@ -39,9 +39,7 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
-          files: |
-            java-mcp/build/libs/dejared-mcp-*.jar
-            !java-mcp/build/libs/dejared-mcp-*-plain.jar
+          files: java-mcp/build/libs/dejared-mcp-*.jar
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
@@ -50,10 +48,14 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Verify npm supports trusted publishing
+      - name: Prepare npm for trusted publishing
         run: |
           npm install -g npm@latest
           npm --version
+          # setup-node's registry-url writes an _authToken line. With no token set it
+          # expands to empty, and npm reads that as "already authenticated" and skips
+          # the OIDC exchange entirely. Removing it lets trusted publishing engage.
+          sed -i '/_authToken/d' "${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
 
       # Authenticates over OIDC via the id-token permission above, so no npm token
       # is involved. Also attaches a provenance attestation automatically.
