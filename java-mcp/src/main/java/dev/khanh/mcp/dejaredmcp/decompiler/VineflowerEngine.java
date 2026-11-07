@@ -3,6 +3,7 @@ package dev.khanh.mcp.dejaredmcp.decompiler;
 import dev.khanh.mcp.dejaredmcp.model.DecompileResult;
 import org.jetbrains.java.decompiler.main.Fernflower;
 import org.jetbrains.java.decompiler.main.extern.IBytecodeProvider;
+import org.jetbrains.java.decompiler.main.extern.IFernflowerLogger;
 import org.jetbrains.java.decompiler.main.extern.IResultSaver;
 import org.springframework.stereotype.Component;
 
@@ -51,7 +52,7 @@ public class VineflowerEngine implements DecompilerEngine {
 
             IBytecodeProvider provider = (externalPath, internalPath) -> classBytes;
 
-            Fernflower fernflower = new Fernflower(provider, saver, options, null);
+            Fernflower fernflower = new Fernflower(provider, saver, options, IFernflowerLogger.NO_OP);
 
             // Add the source (using the class file path as the external path)
             fernflower.addSource(new java.io.File(internalName + ".class"));

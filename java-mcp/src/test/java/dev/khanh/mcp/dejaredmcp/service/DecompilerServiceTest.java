@@ -47,6 +47,13 @@ class DecompilerServiceTest {
     }
 
     @Test
+    void decompileWithVineflower_returnsSource() {
+        var result = service.decompile(testJar.toString(), "com.example.hello.HelloWorld", "vineflower");
+        assertTrue(result.contains("HelloWorld") || result.contains("class"), "Should contain class definition");
+        assertFalse(result.startsWith("Error"));
+    }
+
+    @Test
     void decompileDefaultEngine_usesCfr() {
         var result = service.decompile(testJar.toString(), "com.example.hello.HelloWorld", null);
         assertFalse(result.startsWith("Error"));
