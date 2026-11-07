@@ -1,6 +1,12 @@
 {
   "name": "dejared-mcp",
   "version": "1.2.1",
+  "scripts": {
+    "sync-version": "node scripts/sync-version.cjs",
+    "check-versions": "node scripts/sync-version.cjs --check",
+    "preversion": "npm run check-versions",
+    "version": "npm run sync-version"
+  },
   "mcpName": "io.github.hqkh4nh/dejared",
   "description": "Java decompiler MCP server for AI coding agents. Explore, search, and decompile JAR, WAR, EAR, and AAR bytecode with CFR, Vineflower, or Procyon.",
   "bin": {
