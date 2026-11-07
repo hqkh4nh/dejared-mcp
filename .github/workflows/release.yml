@@ -73,4 +73,13 @@ jobs:
         run: ./mcp-publisher login github-oidc
 
       - name: Publish to MCP Registry
-        run: ./mcp-publisher publish
+        shell: bash
+        run: |
+          # npm metadata may take a moment to propagate after a successful publish.
+          for attempt in {1..5}; do
+            if ./mcp-publisher publish; then
+              exit 0
+            fi
+            sleep 15
+          done
+          exit 1

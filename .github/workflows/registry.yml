@@ -1,0 +1,63 @@
+name: Publish existing release to MCP Registry
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag (for example v1.2.2)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Verify tag and versions
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          node scripts/sync-version.cjs --check
+          VERSION=$(node -p "require('./package.json').version")
+          test "$RELEASE_TAG" = "v$VERSION"
+
+      - name: Wait for npm version to be available
+        shell: bash
+        run: |
+          PACKAGE=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          for attempt in {1..10}; do
+            if npm view "$PACKAGE@$VERSION" version --registry=https://registry.npmjs.org; then
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::error::Published npm version is not available yet"
+          exit 1
+
+      - name: Install mcp-publisher
+        shell: bash
+        run: |
+          curl --fail --show-error -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+
+      - name: Authenticate to MCP Registry
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish to MCP Registry
+        shell: bash
+        run: |
+          for attempt in {1..5}; do
+            if ./mcp-publisher publish; then
+              exit 0
+            fi
+            sleep 15
+          done
+          exit 1
