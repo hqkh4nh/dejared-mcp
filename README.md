@@ -369,15 +369,26 @@ with `java -jar`. See the "Pure Java" section under
 
 Contributions are welcome. Please follow these guidelines:
 
-1. Fork the repository and create a feature branch from `master`.
+1. Fork the repository and create a feature branch from `main`.
 2. Ensure your changes compile and pass existing tests.
 3. Write clear commit messages describing the purpose of each change.
-4. Open a pull request against `master` with a description of what
+4. Open a pull request against `main` with a description of what
    the change does and why.
 
-Every manifest listed under [Project Structure](#project-structure) carries a
-`version` field, and CI fails the build if any of them drifts from
-`package.json`. Bump them together.
+The release version is maintained in `package.json`. Gradle and the JAR runner
+read it directly. To bump the version and synchronize the plugin and registry
+manifests, run:
+
+```sh
+npm version patch --no-git-tag-version
+# Or use minor, major, or an explicit version instead of patch.
+npm run check-versions
+```
+
+Review and commit all changed manifests together. Create the matching `vX.Y.Z`
+tag only when ready to publish: pushing that tag starts the release workflow.
+If you edit `package.json` manually, run `npm run sync-version` afterward.
+CI and the release workflow reject mismatched versions without modifying files.
 
 ### Project Structure
 
